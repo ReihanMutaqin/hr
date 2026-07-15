@@ -23,6 +23,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { trpc } from "@/providers/trpc";
 import { useAuth } from "@/hooks/useAuth";
 import { formatRupiah, formatDateTime, statusLabel, statusVariant } from "@/lib/format";
@@ -195,11 +200,84 @@ export default function Payroll() {
                     </TableCell>
                     <TableCell className="text-right whitespace-nowrap text-red-600">
                       <span className="md:hidden text-muted-foreground mr-2 font-normal text-xs">Potongan:</span>
-                      -{formatRupiah(s.deduction)}
+                      {s.deduction > 0 ? (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button className="inline-flex items-center gap-1 hover:underline underline-offset-4 cursor-pointer focus:outline-none">
+                              -{formatRupiah(s.deduction)}
+                              <Info className="h-3 w-3 opacity-50" />
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-64 text-sm" side="top">
+                            <div className="space-y-2">
+                              <p className="font-semibold text-slate-900 dark:text-slate-100">Rincian Potongan</p>
+                              <div className="text-xs text-muted-foreground space-y-1">
+                                <div className="flex justify-between">
+                                  <span>Asumsi Hari Kerja:</span>
+                                  <span>22 Hari</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Kehadiran Tercatat:</span>
+                                  <span>{Math.round(22 * (1 - s.deduction / (s.baseSalary || 1)))} Hari</span>
+                                </div>
+                                <div className="flex justify-between text-red-600 font-medium">
+                                  <span>Tidak Hadir/Absen:</span>
+                                  <span>{22 - Math.round(22 * (1 - s.deduction / (s.baseSalary || 1)))} Hari</span>
+                                </div>
+                              </div>
+                              <p className="text-[10px] text-muted-foreground italic mt-1 leading-tight">
+                                *Pemotongan dihitung secara prorata berdasarkan jumlah hari ketidakhadiran di luar status Hadir dan Terlambat.
+                              </p>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      ) : (
+                        `-${formatRupiah(s.deduction)}`
+                      )}
                     </TableCell>
                     <TableCell className="text-right whitespace-nowrap text-amber-600">
                       <span className="lg:hidden text-muted-foreground mr-2 font-normal text-xs">Pajak:</span>
-                      -{formatRupiah(s.tax)}
+                      {s.tax > 0 ? (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button className="inline-flex items-center gap-1 hover:underline underline-offset-4 cursor-pointer focus:outline-none">
+                              -{formatRupiah(s.tax)}
+                              <Info className="h-3 w-3 opacity-50" />
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-64 text-sm" side="top">
+                            <div className="space-y-2">
+                              <p className="font-semibold text-slate-900 dark:text-slate-100">Rincian Pajak (PPh 21)</p>
+                              <div className="pt-2 border-t text-xs text-muted-foreground space-y-1">
+                                <div className="flex justify-between">
+                                  <span>Gaji Pokok:</span>
+                                  <span>{formatRupiah(s.baseSalary)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Total Tunjangan:</span>
+                                  <span>{formatRupiah(s.allowance + s.overtime + s.bonus)}</span>
+                                </div>
+                                <div className="flex justify-between text-red-600">
+                                  <span>Potongan Absensi:</span>
+                                  <span>-{formatRupiah(s.deduction)}</span>
+                                </div>
+                              </div>
+                              <div className="pt-2 border-t text-xs">
+                                <div className="flex justify-between font-medium">
+                                  <span>Dasar Pengenaan Pajak:</span>
+                                  <span>{formatRupiah(s.baseSalary + s.allowance + s.overtime + s.bonus - s.deduction)}</span>
+                                </div>
+                                <div className="flex justify-between font-medium mt-1">
+                                  <span>Total Pajak (5%):</span>
+                                  <span className="text-amber-600">-{formatRupiah(s.tax)}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      ) : (
+                        `-${formatRupiah(s.tax)}`
+                      )}
                     </TableCell>
                     <TableCell className="text-right font-semibold whitespace-nowrap">
                       {formatRupiah(s.netSalary)}
