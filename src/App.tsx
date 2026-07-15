@@ -14,6 +14,8 @@ import Payroll from "@/pages/Payroll";
 import Performance from "@/pages/Performance";
 import Announcements from "@/pages/Announcements";
 import UsersPage from "@/pages/Users";
+import CandidatePortal from "@/pages/CandidatePortal";
+import Candidates from "@/pages/Candidates";
 import NotFound from "@/pages/NotFound";
 
 function RequireAuth({
@@ -41,6 +43,11 @@ export default function App() {
     <>
       <Routes>
         <Route path="/login" element={<Login />} />
+        
+        {/* Public Routes */}
+        <Route path="/apply/:id" element={<CandidatePortal />} />
+
+        {/* Protected Routes */}
         <Route
           element={
             <RequireAuth>
@@ -70,6 +77,14 @@ export default function App() {
             element={
               <RequireAuth roles={["admin", "hr"]}>
                 <Recruitment />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/candidates"
+            element={
+              <RequireAuth roles={["admin", "hr"]}>
+                <Candidates />
               </RequireAuth>
             }
           />

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { eq, desc, count, asc } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { createRouter } from "../middleware.js";
+import { createRouter, publicQuery } from "../middleware.js";
 import { authedQuery, managerQuery } from "../auth.js";
 import { getDb } from "../queries/connection.js";
 import { jobPostings, candidates, interviews, departments } from "../../db/schema.js";
@@ -9,6 +9,53 @@ import { rerankDocuments } from "../services/rerank.js";
 import { evaluateCandidateCV } from "../services/cvReader.js";
 
 export const recruitmentRouter = createRouter({
+  /* ---------------- Public Job Endpoints ---------------- */
+  publicJob: publicQuery
+    .input(z.object({ id: z.number().int().positive() }))
+    .query(async ({ input }) => {
+      const db = getDb();
+      const [job] = await db
+        .select({ job: jobPostings, departmentName: departments.name })
+        .from(jobPostings)
+        .leftJoin(departments, eq(jobPostings.departmentId, departments.id))
+        .where(eq(jobPostings.id, input.id))
+        .limit(1);
+      if (!job || job.job.status !== "open") {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Lowongan tidak ditemukan atau sudah ditutup" });
+      }
+      return {
+        ...job.job,
+        departmentName: job.departmentName,
+      };
+    }),
+
+  publicApplyJob: publicQuery
+    .input(
+      z.object({
+        jobId: z.number().int().positive(),
+        fullName: z.string().min(1),
+        email: z.string().email(),
+        phone: z.string().optional(),
+        cvText: z.string().min(10),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const db = getDb();
+      const [job] = await db.select().from(jobPostings).where(eq(jobPostings.id, input.jobId)).limit(1);
+      if (!job || job.status !== "open") {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Lowongan tidak tersedia" });
+      }
+      await db.insert(candidates).values({
+        jobId: input.jobId,
+        fullName: input.fullName,
+        email: input.email,
+        phone: input.phone || null,
+        cvText: input.cvText,
+        source: "Public Portal",
+      });
+      return { ok: true };
+    }),
+
   /* ---------------- Job postings ---------------- */
   jobs: authedQuery.query(async () => {
     const db = getDb();
@@ -250,6 +297,39 @@ export const recruitmentRouter = createRouter({
         opinion: aiResponse.opinion,
         model: aiResponse.model,
       };
+    }),
+
+  batchCreateCandidates: managerQuery
+    .input(
+      z.object({
+        jobId: z.number().int().positive(),
+        candidates: z.array(
+          z.object({
+            fullName: z.string().min(1),
+            email: z.string().email(),
+            cvText: z.string().min(10),
+          })
+        ),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const db = getDb();
+      if (input.candidates.length === 0) return { count: 0 };
+      
+      const [job] = await db.select().from(jobPostings).where(eq(jobPostings.id, input.jobId)).limit(1);
+      if (!job) throw new TRPCError({ code: "NOT_FOUND", message: "Lowongan tidak ditemukan" });
+
+      const values = input.candidates.map(cand => ({
+        jobId: input.jobId,
+        fullName: cand.fullName,
+        email: cand.email,
+        cvText: cand.cvText,
+        source: "Batch Upload",
+      }));
+
+      await db.insert(candidates).values(values);
+
+      return { count: values.length, ok: true };
     }),
 
   /* ---------------- Interviews ---------------- */

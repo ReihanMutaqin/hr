@@ -14,6 +14,7 @@ import {
   LogOut,
   Menu,
   Sparkles,
+  FileUser,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -43,6 +44,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/employees", label: "Karyawan", icon: Users, roles: ["admin", "hr"] },
   { to: "/organization", label: "Organisasi", icon: Building2, roles: ["admin", "hr"] },
   { to: "/recruitment", label: "Rekrutmen & AI", icon: Briefcase, roles: ["admin", "hr"] },
+  { to: "/candidates", label: "Kandidat", icon: FileUser, roles: ["admin", "hr"] },
   { to: "/attendance", label: "Absensi", icon: CalendarCheck, roles: ["admin", "hr", "employee"] },
   { to: "/leave", label: "Cuti", icon: CalendarDays, roles: ["admin", "hr", "employee"] },
   { to: "/payroll", label: "Payroll", icon: Wallet, roles: ["admin", "hr", "employee"] },
