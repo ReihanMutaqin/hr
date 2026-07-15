@@ -142,6 +142,8 @@ export default function Recruitment() {
     onError: (e) => toast.error(e.message),
   });
 
+  const [expandedReasoningId, setExpandedReasoningId] = useState<number | null>(null);
+
   const [ranking, setRanking] = useState<{
     jobTitle: string;
     model: string;
@@ -149,6 +151,7 @@ export default function Recruitment() {
     results: Array<{
       rank: number;
       score: number;
+      reasoning?: string;
       candidate: {
         id: number;
         fullName: string;
@@ -521,9 +524,20 @@ export default function Recruitment() {
                           style={{ width: `${Math.max(4, r.score)}%` }}
                         />
                       </div>
-                      <Badge className="bg-indigo-600 w-12 justify-center">{r.score.toFixed(0)}</Badge>
+                      <Badge 
+                        className="bg-indigo-600 w-12 justify-center cursor-pointer hover:bg-indigo-700 transition-colors"
+                        onClick={() => setExpandedReasoningId(expandedReasoningId === r.candidate.id ? null : r.candidate.id)}
+                      >
+                        {r.score.toFixed(0)}
+                      </Badge>
                     </div>
                   </div>
+                  {expandedReasoningId === r.candidate.id && r.reasoning && (
+                    <div className="mt-3 ml-11 rounded-md bg-indigo-50/50 p-3 text-sm text-indigo-900 border border-indigo-100/50 whitespace-pre-wrap">
+                      <span className="font-semibold block mb-1 text-indigo-800">Kesimpulan AI:</span>
+                      {r.reasoning}
+                    </div>
+                  )}
                   <p className="mt-2 line-clamp-2 pl-11 text-xs text-muted-foreground">
                     {r.candidate.cvText}
                   </p>

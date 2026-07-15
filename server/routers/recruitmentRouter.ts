@@ -249,9 +249,11 @@ export const recruitmentRouter = createRouter({
         model: reranked.model,
         fallback: reranked.fallback,
         results: reranked.results.map((r, i) => ({
+          candidate: cands[r.index],
           rank: i + 1,
           score: r.score,
-          candidate: cands[r.index],
+          rawScore: r.rawScore,
+          reasoning: r.reasoning,
         })),
       };
     }),

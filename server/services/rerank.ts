@@ -15,6 +15,7 @@ export type RerankResult = {
   index: number;
   score: number; // normalized 0-100 (best doc in batch = 100)
   rawScore: number; // raw relevance score from the model
+  reasoning?: string; // AI conclusion/reasoning
 };
 
 export type RerankResponse = {
@@ -96,7 +97,7 @@ Dokumen:
 ${documents.map((d, i) => `[ID: ${i}] ${d.slice(0, 1500)}`).join('\n\n')}
 
 Keluarkan HANYA JSON array murni tanpa markdown, tanpa penjelasan, dengan format:
-[{"index": 0, "score": 85}, {"index": 1, "score": 40}]`;
+[{"index": 0, "score": 85, "kesimpulan": "Pengalaman sangat cocok..."}, {"index": 1, "score": 40, "kesimpulan": "Kurang pengalaman di bidang IT..."}]`;
 
         const res = await fetch(OPENROUTER_CHAT_URL, {
           method: "POST",
@@ -120,7 +121,7 @@ Keluarkan HANYA JSON array murni tanpa markdown, tanpa penjelasan, dengan format
             const results: RerankResult[] = documents.map((_, i) => {
               const p = parsed.find((x: any) => x.index === i);
               const score = p ? Math.min(100, Math.max(0, Number(p.score) || 0)) : 0;
-              return { index: i, score, rawScore: score / 100 };
+              return { index: i, score, rawScore: score / 100, reasoning: p?.kesimpulan };
             }).sort((a, b) => b.score - a.score);
             response = { results, model, fallback: false };
           }
