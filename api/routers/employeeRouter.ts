@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { eq, like, or, and, desc, asc, count } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { createRouter } from "../middleware";
-import { authedQuery, managerQuery } from "../auth";
-import { getDb } from "../queries/connection";
-import { employees, departments, positions } from "@db/schema";
-import { rerankDocuments } from "../services/rerank";
+import { createRouter } from "../middleware.js";
+import { authedQuery, managerQuery } from "../auth.js";
+import { getDb } from "../queries/connection.js";
+import { employees, departments, positions } from "../../db/schema.js";
+import { rerankDocuments } from "../services/rerank.js";
 
 const employeeInput = z.object({
   employeeNo: z.string().min(1).max(32),

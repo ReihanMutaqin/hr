@@ -1,9 +1,9 @@
 import { randomBytes, scryptSync, createHmac, timingSafeEqual } from "node:crypto";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
-import { getDb } from "./queries/connection";
-import { users } from "@db/schema";
-import { publicQuery } from "./middleware";
+import { getDb } from "./queries/connection.js";
+import { users } from "../db/schema.js";
+import { publicQuery } from "./middleware.js";
 
 /* ------------------------------------------------------------------ */
 /* Password hashing (scrypt)                                           */

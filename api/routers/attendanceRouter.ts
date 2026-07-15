@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { eq, and, gte, lte, desc, count } from "drizzle-orm";
-import { createRouter } from "../middleware";
-import { authedQuery, managerQuery } from "../auth";
-import { getDb } from "../queries/connection";
-import { attendanceRecords, employees } from "@db/schema";
+import { createRouter } from "../middleware.js";
+import { authedQuery, managerQuery } from "../auth.js";
+import { getDb } from "../queries/connection.js";
+import { attendanceRecords, employees } from "../../db/schema.js";
 
 function todayStr(): string {
   return new Date().toISOString().slice(0, 10);

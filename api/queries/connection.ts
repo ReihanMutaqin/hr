@@ -1,17 +1,15 @@
 import mysql from "mysql2/promise";
 import { drizzle } from "drizzle-orm/mysql2";
-import { env } from "../lib/env";
-import * as schema from "@db/schema";
-import * as relations from "@db/relations";
+import { env } from "../lib/env.js";
+import * as schema from "../../db/schema.js";
+import * as relations from "../../db/relations.js";
 
 const fullSchema = { ...schema, ...relations };
 
-type DbInstance = ReturnType<typeof drizzle<typeof fullSchema>>;
-let instance: DbInstance | undefined;
+let instance: any;
 
-export function getDb(): DbInstance {
+export function getDb() {
   if (!instance) {
-    // Parse URL and strip the ?ssl=... query string (TiDB uses ssl option separately)
     const rawUrl = env.databaseUrl;
     const cleanUrl = rawUrl.split("?")[0];
 
@@ -30,5 +28,5 @@ export function getDb(): DbInstance {
       mode: "default",
     });
   }
-  return instance;
+  return instance as ReturnType<typeof drizzle<typeof fullSchema>>;
 }

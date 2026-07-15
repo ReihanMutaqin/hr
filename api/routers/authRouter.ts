@@ -1,18 +1,17 @@
 import { z } from "zod";
 import { eq, desc } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { createRouter, publicQuery } from "../middleware";
+import { createRouter, publicQuery } from "../middleware.js";
 import {
   authedQuery,
-  adminQuery,
   managerQuery,
   hashPassword,
   verifyPassword,
   createSessionCookie,
   clearSessionCookie,
-} from "../auth";
-import { getDb } from "../queries/connection";
-import { users, employees } from "@db/schema";
+} from "../auth.js";
+import { getDb } from "../queries/connection.js";
+import { users, employees } from "../../db/schema.js";
 
 export const authRouter = createRouter({
   me: publicQuery.query(({ ctx }) => ctx.user),

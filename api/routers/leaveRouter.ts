@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { eq, desc, count } from "drizzle-orm";
-import { createRouter } from "../middleware";
-import { authedQuery, managerQuery } from "../auth";
-import { getDb } from "../queries/connection";
-import { leaveRequests, employees } from "@db/schema";
+import { createRouter } from "../middleware.js";
+import { authedQuery, managerQuery } from "../auth.js";
+import { getDb } from "../queries/connection.js";
+import { leaveRequests, employees } from "../../db/schema.js";
 
 export const leaveRouter = createRouter({
   list: authedQuery

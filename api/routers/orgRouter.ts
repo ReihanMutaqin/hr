@@ -1,10 +1,10 @@
 import { z } from "zod";
 import { eq, count, asc } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { createRouter } from "../middleware";
-import { authedQuery, managerQuery } from "../auth";
-import { getDb } from "../queries/connection";
-import { departments, positions, employees } from "@db/schema";
+import { createRouter } from "../middleware.js";
+import { authedQuery, managerQuery } from "../auth.js";
+import { getDb } from "../queries/connection.js";
+import { departments, positions, employees } from "../../db/schema.js";
 
 export const orgRouter = createRouter({
   /* ---------------- Departments ---------------- */

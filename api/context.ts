@@ -1,5 +1,5 @@
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
-import { parseSession, loadUser, type SessionUser } from "./auth";
+import { parseSession, loadUser, type SessionUser } from "./auth.js";
 
 export type TrpcContext = {
   req: Request;

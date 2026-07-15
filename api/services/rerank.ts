@@ -1,5 +1,5 @@
-import { getDb } from "../queries/connection";
-import { aiLogs } from "@db/schema";
+import { getDb } from "../queries/connection.js";
+import { aiLogs } from "../../db/schema.js";
 
 /**
  * AI rerank service — NVIDIA Llama Nemotron Rerank VL 1B v2 via OpenRouter.

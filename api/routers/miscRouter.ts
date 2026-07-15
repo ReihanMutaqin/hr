@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { eq, desc, count, sum, gte } from "drizzle-orm";
-import { createRouter } from "../middleware";
-import { authedQuery, managerQuery } from "../auth";
-import { getDb } from "../queries/connection";
+import { createRouter } from "../middleware.js";
+import { authedQuery, managerQuery } from "../auth.js";
+import { getDb } from "../queries/connection.js";
 import {
   announcements,
   employees,
@@ -13,7 +13,7 @@ import {
   leaveRequests,
   payslips,
   aiLogs,
-} from "@db/schema";
+} from "../../db/schema.js";
 
 export const miscRouter = createRouter({
   /* ---------------- Announcements ---------------- */

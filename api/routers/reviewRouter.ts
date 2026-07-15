@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { eq, desc, asc } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { createRouter } from "../middleware";
-import { authedQuery, managerQuery } from "../auth";
-import { getDb } from "../queries/connection";
-import { performanceReviews, employees, departments } from "@db/schema";
-import { rerankDocuments } from "../services/rerank";
+import { createRouter } from "../middleware.js";
+import { authedQuery, managerQuery } from "../auth.js";
+import { getDb } from "../queries/connection.js";
+import { performanceReviews, employees, departments } from "../../db/schema.js";
+import { rerankDocuments } from "../services/rerank.js";
 
 export const reviewRouter = createRouter({
   list: authedQuery

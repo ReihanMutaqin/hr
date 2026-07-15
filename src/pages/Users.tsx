@@ -87,7 +87,7 @@ export default function UsersPage() {
   const [showNewPassword, setShowNewPassword] = useState(false);
 
   // Edit dialog
-  const [editDialog, setEditDialog] = useState<{ open: boolean; userId: number; userName: string; isActive: boolean } | null>(null);
+
 
   const { data: users, isLoading } = trpc.auth.listUsers.useQuery();
   const { data: employees } = trpc.employee.list.useQuery({});
@@ -105,7 +105,6 @@ export default function UsersPage() {
   const update = trpc.auth.updateUser.useMutation({
     onSuccess: () => {
       toast.success("Pengguna diperbarui");
-      setEditDialog(null);
       utils.auth.listUsers.invalidate();
     },
     onError: (e) => toast.error(e.message),

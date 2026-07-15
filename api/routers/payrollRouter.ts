@@ -1,10 +1,10 @@
 import { z } from "zod";
 import { eq, and, desc, sum, count, gte, lte } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { createRouter } from "../middleware";
-import { authedQuery, managerQuery } from "../auth";
-import { getDb } from "../queries/connection";
-import { payslips, employees, attendanceRecords } from "@db/schema";
+import { createRouter } from "../middleware.js";
+import { authedQuery, managerQuery } from "../auth.js";
+import { getDb } from "../queries/connection.js";
+import { payslips, employees, attendanceRecords } from "../../db/schema.js";
 
 function calcPayslip(baseSalary: number, presentDays: number, workDays: number) {
   // pro-rate deduction for absences, 10% allowance, 5% tax (PPh21 simplified)
