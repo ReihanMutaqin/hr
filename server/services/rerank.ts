@@ -102,16 +102,19 @@ export async function rerankDocuments(
       if (res.ok) {
         const payload = (await res.json()) as OpenRouterRerankPayload;
         const raw = payload.results ?? [];
-        const maxRaw = Math.max(...raw.map((r) => r.relevance_score), 0);
         const results: RerankResult[] = raw
-          .map((r) => ({
-            index: r.index,
-            rawScore: r.relevance_score,
-            score:
-              maxRaw > 0
-                ? Math.round((r.relevance_score / maxRaw) * 1000) / 10
-                : 0,
-          }))
+          .map((r) => {
+            let scoreVal = r.relevance_score;
+            // If score is outside 0-1, it's likely a logit, so apply sigmoid
+            if (scoreVal < 0 || scoreVal > 1) {
+              scoreVal = 1 / (1 + Math.exp(-scoreVal));
+            }
+            return {
+              index: r.index,
+              rawScore: r.relevance_score,
+              score: Math.min(100, Math.max(0, Math.round(scoreVal * 100))),
+            };
+          })
           .sort((a, b) => b.score - a.score);
         response = { results, model, fallback: false };
       } else {
