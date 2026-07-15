@@ -279,8 +279,11 @@ export default function Recruitment() {
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="font-semibold leading-tight">{job.title}</p>
-                      <p className="mt-0.5 text-xs text-muted-foreground">{job.departmentName ?? "-"}</p>
+                      <p className="font-semibold leading-tight">
+                        <span className="text-muted-foreground font-normal text-xs mr-2 border border-slate-200 px-1.5 py-0.5 rounded bg-slate-50">ID: {job.id}</span>
+                        {job.title}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">{job.departmentName ?? "-"}</p>
                     </div>
                     <Badge variant={statusVariant(job.status)}>{statusLabel(job.status)}</Badge>
                   </div>
@@ -326,7 +329,10 @@ export default function Recruitment() {
                 <CardHeader className="pb-3">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <CardTitle>{selectedJob.title}</CardTitle>
+                      <CardTitle>
+                        <span className="text-muted-foreground font-normal text-sm mr-2 border border-slate-200 px-2 py-0.5 rounded bg-slate-50">ID: {selectedJob.id}</span>
+                        {selectedJob.title}
+                      </CardTitle>
                       <p className="mt-1 max-w-2xl text-sm text-muted-foreground line-clamp-2">
                         {selectedJob.description}
                       </p>
