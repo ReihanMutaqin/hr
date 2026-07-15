@@ -11,6 +11,7 @@ import {
   Trophy,
   Medal,
   Award,
+  Bot,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -66,6 +67,12 @@ export default function Recruitment() {
   const [candDialog, setCandDialog] = useState(false);
   const [interviewDialog, setInterviewDialog] = useState<number | null>(null);
   const [rankingDialog, setRankingDialog] = useState(false);
+  
+  const [aiOpinionDialog, setAiOpinionDialog] = useState<{
+    open: boolean;
+    candidateName: string;
+    opinion: string;
+  } | null>(null);
 
   const [jobForm, setJobForm] = useState({
     title: "",
@@ -163,6 +170,22 @@ export default function Recruitment() {
           ? "Rerank selesai (mode fallback keyword)"
           : `Rerank AI selesai — ${data.model.split("/").pop()}`,
       );
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const evaluateAI = trpc.recruitment.evaluateCandidateAI.useMutation({
+    onSuccess: (data, variables) => {
+      invalidateAll();
+      const cand = candidates?.find(c => c.id === variables.candidateId);
+      if (cand) {
+        setAiOpinionDialog({
+          open: true,
+          candidateName: cand.fullName,
+          opinion: data.opinion,
+        });
+      }
+      toast.success("Analisis CV selesai!");
     },
     onError: (e) => toast.error(e.message),
   });
@@ -365,10 +388,12 @@ export default function Recruitment() {
                           </TableCell>
                           <TableCell>
                             {cand.aiScore ? (
-                              <Badge className="bg-indigo-600">
-                                <Sparkles className="mr-1 h-3 w-3" />
-                                {Number(cand.aiScore).toFixed(0)}
-                              </Badge>
+                              <div className="flex flex-col gap-1">
+                                <Badge className="bg-indigo-600 w-fit">
+                                  <Sparkles className="mr-1 h-3 w-3" />
+                                  {Number(cand.aiScore).toFixed(0)}
+                                </Badge>
+                              </div>
                             ) : (
                               <span className="text-xs text-muted-foreground">belum</span>
                             )}
@@ -395,6 +420,27 @@ export default function Recruitment() {
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                title="Minta Pendapat AI"
+                                className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                                disabled={evaluateAI.isPending}
+                                onClick={() => {
+                                  if (cand.aiNote && !cand.aiNote.startsWith("AI rerank")) {
+                                    // Sudah pernah dievaluasi lengkap
+                                    setAiOpinionDialog({
+                                      open: true,
+                                      candidateName: cand.fullName,
+                                      opinion: cand.aiNote,
+                                    });
+                                  } else {
+                                    evaluateAI.mutate({ candidateId: cand.id });
+                                  }
+                                }}
+                              >
+                                <Bot className="h-4 w-4" />
+                              </Button>
                               <Button
                                 variant="ghost"
                                 size="icon"
@@ -483,6 +529,26 @@ export default function Recruitment() {
                   </p>
                 </div>
               ))}
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Opinion Dialog */}
+      <Dialog open={aiOpinionDialog?.open ?? false} onOpenChange={(open) => !open && setAiOpinionDialog(null)}>
+        <DialogContent className="max-h-[85vh] sm:max-w-2xl flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bot className="h-5 w-5 text-indigo-500" />
+              Pendapat AI: {aiOpinionDialog?.candidateName}
+            </DialogTitle>
+            <DialogDescription>
+              Analisis kualitatif kecocokan kandidat dengan lowongan ini.
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="flex-1 pr-4 mt-2">
+            <div className="whitespace-pre-wrap text-sm leading-relaxed">
+              {aiOpinionDialog?.opinion}
             </div>
           </ScrollArea>
         </DialogContent>

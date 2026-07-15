@@ -6,6 +6,7 @@ import { authedQuery, managerQuery } from "../auth.js";
 import { getDb } from "../queries/connection.js";
 import { jobPostings, candidates, interviews, departments } from "../../db/schema.js";
 import { rerankDocuments } from "../services/rerank.js";
+import { evaluateCandidateCV } from "../services/cvReader.js";
 
 export const recruitmentRouter = createRouter({
   /* ---------------- Job postings ---------------- */
@@ -205,6 +206,49 @@ export const recruitmentRouter = createRouter({
           score: r.score,
           candidate: cands[r.index],
         })),
+      };
+    }),
+
+  evaluateCandidateAI: managerQuery
+    .input(z.object({ candidateId: z.number().int().positive() }))
+    .mutation(async ({ input }) => {
+      const db = getDb();
+      const [cand] = await db
+        .select()
+        .from(candidates)
+        .where(eq(candidates.id, input.candidateId))
+        .limit(1);
+      if (!cand) throw new TRPCError({ code: "NOT_FOUND", message: "Kandidat tidak ditemukan" });
+
+      const [job] = await db
+        .select({ job: jobPostings, departmentName: departments.name })
+        .from(jobPostings)
+        .leftJoin(departments, eq(jobPostings.departmentId, departments.id))
+        .where(eq(jobPostings.id, cand.jobId))
+        .limit(1);
+      if (!job) throw new TRPCError({ code: "NOT_FOUND", message: "Lowongan tidak ditemukan" });
+
+      const jobDetails = [
+        `Posisi: ${job.job.title}`,
+        job.departmentName ? `Departemen: ${job.departmentName}` : "",
+        `Tipe: ${job.job.employmentType}`,
+        `Deskripsi: ${job.job.description}`,
+        `Persyaratan: ${job.job.requirements ?? ""}`,
+      ]
+        .filter(Boolean)
+        .join("\n");
+
+      const aiResponse = await evaluateCandidateCV(jobDetails, cand.cvText);
+
+      await db
+        .update(candidates)
+        .set({ aiNote: aiResponse.opinion })
+        .where(eq(candidates.id, cand.id));
+
+      return {
+        ok: true,
+        opinion: aiResponse.opinion,
+        model: aiResponse.model,
       };
     }),
 
