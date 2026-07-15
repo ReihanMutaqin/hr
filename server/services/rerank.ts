@@ -8,6 +8,7 @@ import { aiLogs } from "../../db/schema.js";
  */
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/rerank";
+const OPENROUTER_CHAT_URL = "https://openrouter.ai/api/v1/chat/completions";
 const DEFAULT_MODEL = "nvidia/llama-nemotron-rerank-vl-1b-v2:free";
 
 export type RerankResult = {
@@ -82,52 +83,97 @@ export async function rerankDocuments(
 
   let response: RerankResponse | null = null;
 
+  const isChatModel = !model.toLowerCase().includes("rerank") && !model.toLowerCase().includes("bge-");
+
   if (apiKey && documents.length > 0) {
-    try {
-      const res = await fetch(OPENROUTER_URL, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model,
-          query: query.slice(0, 4000),
-          documents: documents.map((d) => d.slice(0, 4000)),
-          top_n: documents.length,
-        }),
-        signal: AbortSignal.timeout(55000),
-      });
+    if (isChatModel) {
+      try {
+        const prompt = `Anda adalah sistem penilai CV profesional. Berikan penilaian kecocokan (skor 0-100) untuk setiap dokumen CV terhadap deskripsi lowongan kerja.
+Lowongan:
+${query.slice(0, 2000)}
 
-      if (res.ok) {
-        const payload = (await res.json()) as OpenRouterRerankPayload;
-        const raw = payload.results ?? [];
-        
-        const maxRaw = Math.max(...raw.map((r) => r.relevance_score), 0);
-        // NVIDIA model often returns very small probabilities (e.g. 0.07 for a good match)
-        // We use an effectiveMax to prevent bad matches from getting 100, while scaling up small scores.
-        const effectiveMax = Math.max(maxRaw, 0.1);
+Dokumen:
+${documents.map((d, i) => `[ID: ${i}] ${d.slice(0, 1500)}`).join('\n\n')}
 
-        const results: RerankResult[] = raw
-          .map((r) => {
-            let scoreVal = r.relevance_score;
-            // If score is outside 0-1, it's likely a logit, so apply sigmoid
-            if (scoreVal < 0 || scoreVal > 1) {
-              scoreVal = 1 / (1 + Math.exp(-scoreVal));
-            }
-            return {
-              index: r.index,
-              rawScore: r.relevance_score,
-              score: Math.min(100, Math.max(0, Math.round((scoreVal / effectiveMax) * 100))),
-            };
-          })
-          .sort((a, b) => b.score - a.score);
-        response = { results, model, fallback: false };
-      } else {
-        console.error(`[rerank] OpenRouter HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`);
+Keluarkan HANYA JSON array murni tanpa markdown, tanpa penjelasan, dengan format:
+[{"index": 0, "score": 85}, {"index": 1, "score": 40}]`;
+
+        const res = await fetch(OPENROUTER_CHAT_URL, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model,
+            messages: [{ role: "user", content: prompt }],
+          }),
+          signal: AbortSignal.timeout(55000),
+        });
+
+        if (res.ok) {
+          const payload = (await res.json()) as any;
+          const content = payload.choices?.[0]?.message?.content || "[]";
+          const match = content.match(/\[.*\]/s);
+          if (match) {
+            const parsed = JSON.parse(match[0]);
+            const results: RerankResult[] = documents.map((_, i) => {
+              const p = parsed.find((x: any) => x.index === i);
+              const score = p ? Math.min(100, Math.max(0, Number(p.score) || 0)) : 0;
+              return { index: i, score, rawScore: score / 100 };
+            }).sort((a, b) => b.score - a.score);
+            response = { results, model, fallback: false };
+          }
+        } else {
+          console.error(`[rerank-chat] OpenRouter HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`);
+        }
+      } catch (err) {
+        console.error("[rerank-chat] OpenRouter request failed:", err);
       }
-    } catch (err) {
-      console.error("[rerank] OpenRouter request failed:", err);
+    } else {
+      try {
+        const res = await fetch(OPENROUTER_URL, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model,
+            query: query.slice(0, 4000),
+            documents: documents.map((d) => d.slice(0, 4000)),
+            top_n: documents.length,
+          }),
+          signal: AbortSignal.timeout(55000),
+        });
+
+        if (res.ok) {
+          const payload = (await res.json()) as OpenRouterRerankPayload;
+          const raw = payload.results ?? [];
+          
+          const maxRaw = Math.max(...raw.map((r) => r.relevance_score), 0);
+          const effectiveMax = Math.max(maxRaw, 0.1);
+
+          const results: RerankResult[] = raw
+            .map((r) => {
+              let scoreVal = r.relevance_score;
+              if (scoreVal < 0 || scoreVal > 1) {
+                scoreVal = 1 / (1 + Math.exp(-scoreVal));
+              }
+              return {
+                index: r.index,
+                rawScore: r.relevance_score,
+                score: Math.min(100, Math.max(0, Math.round((scoreVal / effectiveMax) * 100))),
+              };
+            })
+            .sort((a, b) => b.score - a.score);
+          response = { results, model, fallback: false };
+        } else {
+          console.error(`[rerank] OpenRouter HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`);
+        }
+      } catch (err) {
+        console.error("[rerank] OpenRouter request failed:", err);
+      }
     }
   }
 
