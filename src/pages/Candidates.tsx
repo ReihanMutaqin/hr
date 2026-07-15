@@ -21,6 +21,7 @@ export default function Candidates() {
   const [files, setFiles] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [viewCvDialog, setViewCvDialog] = useState<{ open: boolean; title: string; content: string } | null>(null);
 
   const batchCreate = trpc.recruitment.batchCreateCandidates.useMutation({
     onSuccess: (data) => {
@@ -104,6 +105,7 @@ export default function Candidates() {
                 <TableHead>Tanggal Apply</TableHead>
                 <TableHead>Skor AI</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead className="w-[100px]">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -139,6 +141,16 @@ export default function Candidates() {
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="capitalize">{cand.status}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                        onClick={() => setViewCvDialog({ open: true, title: cand.fullName, content: cand.cvText })}
+                      >
+                        <FileText className="h-4 w-4 mr-1" /> CV
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
@@ -226,6 +238,23 @@ export default function Candidates() {
               Mulai Batch Upload
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View CV Dialog */}
+      <Dialog open={viewCvDialog?.open ?? false} onOpenChange={(open) => !open && setViewCvDialog(null)}>
+        <DialogContent className="max-h-[85vh] sm:max-w-2xl flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Isi CV: {viewCvDialog?.title}</DialogTitle>
+            <DialogDescription>
+              Teks murni yang diekstrak dari dokumen PDF kandidat.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto mt-2 pr-2">
+            <div className="bg-slate-50 p-4 rounded-md border text-sm text-slate-800 whitespace-pre-wrap font-mono leading-relaxed">
+              {viewCvDialog?.content || "Tidak ada teks CV yang tersimpan."}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
