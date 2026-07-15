@@ -45,6 +45,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { trpc } from "@/providers/trpc";
 import { cn } from "@/lib/utils";
 import { formatRupiah, formatDate, statusLabel, statusVariant } from "@/lib/format";
@@ -391,12 +396,18 @@ export default function Recruitment() {
                           </TableCell>
                           <TableCell>
                             {cand.aiScore ? (
-                              <div className="flex flex-col gap-1">
-                                <Badge className="bg-indigo-600 w-fit">
-                                  <Sparkles className="mr-1 h-3 w-3" />
-                                  {Number(cand.aiScore).toFixed(0)}
-                                </Badge>
-                              </div>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Badge className="bg-indigo-600 w-fit cursor-pointer hover:bg-indigo-700 transition-colors">
+                                    <Sparkles className="mr-1 h-3 w-3" />
+                                    {Number(cand.aiScore).toFixed(0)}
+                                  </Badge>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-80 p-4 text-sm whitespace-pre-wrap">
+                                  <span className="font-semibold block mb-2 text-indigo-800 border-b pb-1">Kesimpulan Rerank AI</span>
+                                  {cand.aiNote || "Tidak ada kesimpulan tersimpan."}
+                                </PopoverContent>
+                              </Popover>
                             ) : (
                               <span className="text-xs text-muted-foreground">belum</span>
                             )}

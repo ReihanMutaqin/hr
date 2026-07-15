@@ -238,7 +238,7 @@ export const recruitmentRouter = createRouter({
           .update(candidates)
           .set({
             aiScore: r.score.toFixed(2),
-            aiNote: `AI rerank (${reranked.fallback ? "fallback keyword" : "Nemotron"}): relevansi ${r.score}/100 terhadap lowongan "${job.job.title}"`,
+            aiNote: r.reasoning || `AI rerank (${reranked.fallback ? "fallback keyword" : "Nemotron"}): relevansi ${r.score}/100 terhadap lowongan "${job.job.title}"`,
             aiRankedAt: new Date(),
           })
           .where(eq(candidates.id, cand.id));
