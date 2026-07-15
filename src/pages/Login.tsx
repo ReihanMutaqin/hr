@@ -8,11 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/hooks/useAuth";
 
-const DEMO_ACCOUNTS = [
-  { username: "admin", password: "admin123", role: "Administrator" },
-  { username: "sinta.hr", password: "hr12345", role: "HR Manager" },
-  { username: "budi.k", password: "budi123", role: "Karyawan" },
-];
 
 export default function Login() {
   const navigate = useNavigate();
@@ -33,11 +28,7 @@ export default function Login() {
     );
   };
 
-  const fillDemo = (u: string, p: string) => {
-    setUsername(u);
-    setPassword(p);
-    setError("");
-  };
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 p-4">
@@ -94,27 +85,12 @@ export default function Login() {
               </Button>
             </form>
 
-            <div className="mt-6">
-              <div className="mb-2 text-xs font-medium text-muted-foreground">Akun demo:</div>
-              <div className="grid gap-2">
-                {DEMO_ACCOUNTS.map((acc) => (
-                  <button
-                    key={acc.username}
-                    type="button"
-                    onClick={() => fillDemo(acc.username, acc.password)}
-                    className="flex items-center justify-between rounded-md border border-dashed border-slate-300 px-3 py-2 text-left text-xs transition-colors hover:border-indigo-400 hover:bg-indigo-50"
-                  >
-                    <span className="font-medium">{acc.username}</span>
-                    <span className="text-muted-foreground">{acc.role}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+
           </CardContent>
         </Card>
 
         <p className="mt-6 text-center text-xs text-slate-500">
-          Didukung NVIDIA Llama Nemotron Rerank via OpenRouter
+          Dibuat Oler RDir Studio
         </p>
       </div>
     </div>
