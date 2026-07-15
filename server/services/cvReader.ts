@@ -56,7 +56,7 @@ ${cvText}
         model,
         messages: [{ role: "user", content: prompt }],
       }),
-      signal: AbortSignal.timeout(30000),
+      signal: AbortSignal.timeout(55000),
     });
 
     if (res.ok) {
