@@ -38,7 +38,7 @@ function CvViewer({ candidateId, textFallback }: { candidateId: number; textFall
   return (
     <div className="flex-1 overflow-y-auto mt-2 pr-2">
       <div className="bg-amber-50 text-amber-800 p-3 rounded-md text-sm border border-amber-200 mb-3">
-        File asli PDF tidak tersimpan di database (kemungkinan file &gt; 3MB saat diunggah). Menampilkan teks hasil ekstraksi sebagai gantinya.
+        File asli PDF tidak tersedia di database (kemungkinan karena CV diunggah sebelum fitur penyimpanan PDF dirilis). Menampilkan teks hasil ekstraksi sebagai gantinya.
       </div>
       <div className="bg-slate-50 p-4 rounded-md border text-sm text-slate-800 whitespace-pre-wrap font-mono leading-relaxed">
         {textFallback || "Tidak ada teks CV yang tersimpan."}
@@ -106,8 +106,6 @@ export default function Candidates() {
             } catch (e) {
               console.error("Failed to read base64", e);
             }
-          } else {
-            toast.warning(`File ${file.name} > 3MB, PDF asli tidak disimpan, hanya teks yang diambil.`);
           }
 
           candidatesPayload.push({
@@ -219,7 +217,7 @@ export default function Candidates() {
         <DialogContent className="sm:max-w-xl">
           <DialogHeader>
             <DialogTitle>Batch Upload CV</DialogTitle>
-            <DialogDescription>Unggah banyak file PDF sekaligus. Sistem akan otomatis mengekstrak teks CV dari PDF (maks 10MB per file) di browser Anda.</DialogDescription>
+            <DialogDescription>Unggah banyak file PDF sekaligus. Sistem akan otomatis mengekstrak teks CV dari PDF (maks 3MB per file) di browser Anda.</DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
@@ -244,7 +242,7 @@ export default function Candidates() {
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     <FileText className="w-8 h-8 mb-2 text-slate-400" />
                     <p className="text-sm text-slate-500"><span className="font-semibold">Klik untuk upload</span></p>
-                    <p className="text-xs text-slate-500">Maksimal 10MB per file PDF</p>
+                    <p className="text-xs text-slate-500">Maksimal 3MB per file PDF</p>
                   </div>
                   <input 
                     type="file" 
@@ -254,9 +252,9 @@ export default function Candidates() {
                     disabled={isProcessing}
                     onChange={(e) => {
                       if (e.target.files) {
-                        const validFiles = Array.from(e.target.files).filter(f => f.size <= 10 * 1024 * 1024 && f.type === "application/pdf");
+                        const validFiles = Array.from(e.target.files).filter(f => f.size <= 3 * 1024 * 1024 && f.type === "application/pdf");
                         if (validFiles.length !== e.target.files.length) {
-                          toast.error("Beberapa file diabaikan karena bukan PDF atau melebihi 10MB");
+                          toast.error("Beberapa file diabaikan karena bukan PDF atau melebihi 3MB");
                         }
                         setFiles(validFiles);
                       }

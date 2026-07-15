@@ -37,6 +37,7 @@ export const recruitmentRouter = createRouter({
         email: z.string().email(),
         phone: z.string().optional(),
         cvText: z.string().min(10),
+        cvFileBase64: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -51,7 +52,8 @@ export const recruitmentRouter = createRouter({
         email: input.email,
         phone: input.phone || null,
         cvText: input.cvText,
-        source: "Public Portal",
+        cvFileBase64: input.cvFileBase64 || null,
+        source: "Public Job Board",
       });
       return { ok: true };
     }),

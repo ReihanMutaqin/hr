@@ -68,8 +68,19 @@ export default function CandidatePortal() {
     
     setIsExtracting(true);
     let cvText = "";
+    let cvFileBase64: string | undefined = undefined;
+
+    const fileToBase64 = (f: File): Promise<string> =>
+      new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(f);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = (err) => reject(err);
+      });
+
     try {
       cvText = await extractTextFromPDF(file);
+      cvFileBase64 = await fileToBase64(file);
     } catch (err: any) {
       setIsExtracting(false);
       return toast.error(err.message || "Gagal membaca PDF");
@@ -86,6 +97,7 @@ export default function CandidatePortal() {
       email: form.email,
       phone: form.phone,
       cvText,
+      cvFileBase64,
     });
     setIsExtracting(false);
   };
@@ -165,7 +177,7 @@ export default function CandidatePortal() {
                       ) : (
                         <>
                           <p className="mb-2 text-sm text-slate-500"><span className="font-semibold">Klik untuk upload</span> atau drag and drop</p>
-                          <p className="text-xs text-slate-500">PDF (Maksimal 10MB)</p>
+                          <p className="text-xs text-slate-500">PDF (Maksimal 3MB)</p>
                         </>
                       )}
                     </div>
@@ -177,7 +189,7 @@ export default function CandidatePortal() {
                       onChange={e => {
                         const f = e.target.files?.[0];
                         if (f) {
-                          if (f.size > 10 * 1024 * 1024) return toast.error("Ukuran file maksimal 10MB");
+                          if (f.size > 3 * 1024 * 1024) return toast.error("Ukuran file maksimal 3MB");
                           if (f.type !== "application/pdf") return toast.error("Hanya menerima format PDF");
                           setFile(f);
                         }
