@@ -5,6 +5,7 @@ import {
   bigint,
   varchar,
   text,
+  mediumtext,
   int,
   decimal,
   boolean,
@@ -120,6 +121,7 @@ export const candidates = mysqlTable(
     email: varchar("email", { length: 320 }).notNull(),
     phone: varchar("phone", { length: 32 }),
     cvText: text("cv_text").notNull(),
+    cvFileBase64: mediumtext("cv_file_base64"),
     source: varchar("source", { length: 64 }).default("Website"),
     status: mysqlEnum("status", [
       "new",

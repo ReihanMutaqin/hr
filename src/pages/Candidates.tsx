@@ -11,6 +11,42 @@ import { extractTextFromPDF } from "@/lib/pdf";
 import { formatDate } from "@/lib/format";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
+function CvViewer({ candidateId, textFallback }: { candidateId: number; textFallback: string }) {
+  const { data, isLoading } = trpc.recruitment.getCandidateFile.useQuery({ id: candidateId });
+
+  if (isLoading) {
+    return (
+      <div className="p-12 text-center text-muted-foreground flex flex-col items-center justify-center gap-3">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" /> 
+        <p>Sedang memuat dokumen...</p>
+      </div>
+    );
+  }
+
+  if (data?.cvFileBase64) {
+    return (
+      <div className="mt-2 h-[70vh] w-full rounded-md overflow-hidden border">
+        <iframe 
+          src={data.cvFileBase64} 
+          className="w-full h-full border-0"
+          title="CV Document"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-1 overflow-y-auto mt-2 pr-2">
+      <div className="bg-amber-50 text-amber-800 p-3 rounded-md text-sm border border-amber-200 mb-3">
+        File asli PDF tidak tersimpan di database (kemungkinan file &gt; 3MB saat diunggah). Menampilkan teks hasil ekstraksi sebagai gantinya.
+      </div>
+      <div className="bg-slate-50 p-4 rounded-md border text-sm text-slate-800 whitespace-pre-wrap font-mono leading-relaxed">
+        {textFallback || "Tidak ada teks CV yang tersimpan."}
+      </div>
+    </div>
+  );
+}
+
 export default function Candidates() {
   const utils = trpc.useUtils();
   const { data: candidates, isLoading } = trpc.recruitment.candidates.useQuery();
@@ -21,7 +57,7 @@ export default function Candidates() {
   const [files, setFiles] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [viewCvDialog, setViewCvDialog] = useState<{ open: boolean; title: string; content: string } | null>(null);
+  const [viewCvDialog, setViewCvDialog] = useState<{ open: boolean; title: string; candidateId: number; textFallback: string } | null>(null);
 
   const batchCreate = trpc.recruitment.batchCreateCandidates.useMutation({
     onSuccess: (data) => {
@@ -42,7 +78,15 @@ export default function Candidates() {
     setIsProcessing(true);
     setProgress(0);
 
-    const candidatesPayload: { fullName: string; email: string; cvText: string }[] = [];
+    const candidatesPayload: { fullName: string; email: string; cvText: string; cvFileBase64?: string }[] = [];
+
+    const fileToBase64 = (f: File): Promise<string> =>
+      new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(f);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = (e) => reject(e);
+      });
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -53,13 +97,24 @@ export default function Candidates() {
           const emailMatch = text.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/);
           const email = emailMatch ? emailMatch[1] : `candidate_${Date.now()}@example.com`;
           
-          // Use filename as a fallback name if we can't extract properly without AI
           const fullName = file.name.replace(".pdf", "").replace(/[-_]/g, " ");
+
+          let cvFileBase64: string | undefined = undefined;
+          if (file.size <= 3 * 1024 * 1024) {
+            try {
+              cvFileBase64 = await fileToBase64(file);
+            } catch (e) {
+              console.error("Failed to read base64", e);
+            }
+          } else {
+            toast.warning(`File ${file.name} > 3MB, PDF asli tidak disimpan, hanya teks yang diambil.`);
+          }
 
           candidatesPayload.push({
             fullName,
             email,
             cvText: text,
+            cvFileBase64,
           });
         }
       } catch (err: any) {
@@ -147,7 +202,7 @@ export default function Candidates() {
                         variant="ghost" 
                         size="sm" 
                         className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
-                        onClick={() => setViewCvDialog({ open: true, title: cand.fullName, content: cand.cvText })}
+                        onClick={() => setViewCvDialog({ open: true, title: cand.fullName, candidateId: cand.id, textFallback: cand.cvText })}
                       >
                         <FileText className="h-4 w-4 mr-1" /> CV
                       </Button>
@@ -243,18 +298,13 @@ export default function Candidates() {
 
       {/* View CV Dialog */}
       <Dialog open={viewCvDialog?.open ?? false} onOpenChange={(open) => !open && setViewCvDialog(null)}>
-        <DialogContent className="max-h-[85vh] sm:max-w-2xl flex flex-col">
+        <DialogContent className="max-h-[90vh] sm:max-w-4xl flex flex-col w-full h-[85vh]">
           <DialogHeader>
-            <DialogTitle>Isi CV: {viewCvDialog?.title}</DialogTitle>
-            <DialogDescription>
-              Teks murni yang diekstrak dari dokumen PDF kandidat.
-            </DialogDescription>
+            <DialogTitle>CV: {viewCvDialog?.title}</DialogTitle>
           </DialogHeader>
-          <div className="flex-1 overflow-y-auto mt-2 pr-2">
-            <div className="bg-slate-50 p-4 rounded-md border text-sm text-slate-800 whitespace-pre-wrap font-mono leading-relaxed">
-              {viewCvDialog?.content || "Tidak ada teks CV yang tersimpan."}
-            </div>
-          </div>
+          {viewCvDialog && (
+            <CvViewer candidateId={viewCvDialog.candidateId} textFallback={viewCvDialog.textFallback} />
+          )}
         </DialogContent>
       </Dialog>
     </div>

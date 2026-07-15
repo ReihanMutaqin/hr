@@ -155,6 +155,7 @@ export const recruitmentRouter = createRouter({
         email: z.string().email(),
         phone: z.string().optional(),
         cvText: z.string().min(10),
+        cvFileBase64: z.string().optional(),
         source: z.string().optional(),
       }),
     )
@@ -167,6 +168,7 @@ export const recruitmentRouter = createRouter({
         email: input.email,
         phone: input.phone || null,
         cvText: input.cvText,
+        cvFileBase64: input.cvFileBase64 || null,
         source: input.source || "Website",
       });
       return { ok: true };
@@ -310,6 +312,7 @@ export const recruitmentRouter = createRouter({
             fullName: z.string().min(1),
             email: z.string().email(),
             cvText: z.string().min(10),
+            cvFileBase64: z.string().optional(),
           })
         ),
       })
@@ -326,6 +329,7 @@ export const recruitmentRouter = createRouter({
         fullName: cand.fullName,
         email: cand.email,
         cvText: cand.cvText,
+        cvFileBase64: cand.cvFileBase64 || null,
         source: "Batch Upload",
       }));
 
@@ -394,5 +398,18 @@ export const recruitmentRouter = createRouter({
     .mutation(async ({ input }) => {
       await getDb().delete(interviews).where(eq(interviews.id, input.id));
       return { ok: true };
+    }),
+
+  getCandidateFile: authedQuery
+    .input(z.object({ id: z.number().int().positive() }))
+    .query(async ({ input }) => {
+      const db = getDb();
+      const [cand] = await db
+        .select({ cvFileBase64: candidates.cvFileBase64 })
+        .from(candidates)
+        .where(eq(candidates.id, input.id))
+        .limit(1);
+      if (!cand) throw new TRPCError({ code: "NOT_FOUND", message: "Kandidat tidak ditemukan" });
+      return { cvFileBase64: cand.cvFileBase64 };
     }),
 });
