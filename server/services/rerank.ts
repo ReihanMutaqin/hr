@@ -102,6 +102,12 @@ export async function rerankDocuments(
       if (res.ok) {
         const payload = (await res.json()) as OpenRouterRerankPayload;
         const raw = payload.results ?? [];
+        
+        const maxRaw = Math.max(...raw.map((r) => r.relevance_score), 0);
+        // NVIDIA model often returns very small probabilities (e.g. 0.07 for a good match)
+        // We use an effectiveMax to prevent bad matches from getting 100, while scaling up small scores.
+        const effectiveMax = Math.max(maxRaw, 0.1);
+
         const results: RerankResult[] = raw
           .map((r) => {
             let scoreVal = r.relevance_score;
@@ -112,7 +118,7 @@ export async function rerankDocuments(
             return {
               index: r.index,
               rawScore: r.relevance_score,
-              score: Math.min(100, Math.max(0, Math.round(scoreVal * 100))),
+              score: Math.min(100, Math.max(0, Math.round((scoreVal / effectiveMax) * 100))),
             };
           })
           .sort((a, b) => b.score - a.score);
