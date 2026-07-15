@@ -178,6 +178,7 @@ export default function Candidates() {
                     <TableCell>
                       <div className="font-medium">{cand.fullName}</div>
                       <div className="text-xs text-muted-foreground">{cand.email}</div>
+                      {cand.phone && <div className="text-xs text-muted-foreground">{cand.phone}</div>}
                     </TableCell>
                     <TableCell className="font-medium text-slate-700">{cand.jobTitle}</TableCell>
                     <TableCell className="text-sm">{cand.source ?? "-"}</TableCell>
