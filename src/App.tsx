@@ -34,7 +34,10 @@ function RequireAuth({
     );
   }
   if (!user) return <Navigate to="/login" replace />;
-  if (roles && !roles.includes(user.role)) return <Navigate to="/" replace />;
+  if (roles && !roles.includes(user.role)) {
+    if (user.role === "employee") return <Navigate to="/attendance" replace />;
+    return <Navigate to="/" replace />;
+  }
   return <>{children}</>;
 }
 
@@ -55,7 +58,14 @@ export default function App() {
             </RequireAuth>
           }
         >
-          <Route path="/" element={<Dashboard />} />
+          <Route
+            path="/"
+            element={
+              <RequireAuth roles={["admin", "hr"]}>
+                <Dashboard />
+              </RequireAuth>
+            }
+          />
           <Route
             path="/employees"
             element={

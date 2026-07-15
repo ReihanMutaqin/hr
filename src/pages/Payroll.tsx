@@ -14,6 +14,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -140,6 +142,18 @@ export default function Payroll() {
         )}
       </div>
 
+      {!isManager && (
+        <Alert className="bg-indigo-50/50 text-indigo-900 border-indigo-100">
+          <Info className="h-4 w-4 text-indigo-600" />
+          <AlertTitle className="text-indigo-800 font-semibold">Informasi Komponen Gaji</AlertTitle>
+          <AlertDescription className="text-xs text-indigo-700 mt-2 space-y-1">
+            <p><strong>Tunjangan (Allowance):</strong> 10% tetap dari Gaji Pokok.</p>
+            <p><strong>Potongan (Deduction):</strong> Dihitung prorata jika Anda memiliki catatan tidak hadir di luar status 'Hadir' (Present) dan 'Terlambat' (Late) berdasar asumsi 22 hari kerja.</p>
+            <p><strong>Pajak (PPh21):</strong> 5% flat dari Gaji Kotor (Pokok + Tunjangan - Potongan).</p>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Slip Gaji</CardTitle>
@@ -151,9 +165,9 @@ export default function Payroll() {
                 <TableHead>Periode</TableHead>
                 <TableHead>Karyawan</TableHead>
                 <TableHead className="text-right">Pokok</TableHead>
-                <TableHead className="text-right hidden md:table-cell">Tunjangan</TableHead>
-                <TableHead className="text-right hidden md:table-cell">Potongan</TableHead>
-                <TableHead className="text-right hidden lg:table-cell">Pajak</TableHead>
+                <TableHead className="text-right">Tunjangan</TableHead>
+                <TableHead className="text-right">Potongan</TableHead>
+                <TableHead className="text-right">Pajak</TableHead>
                 <TableHead className="text-right">Bersih</TableHead>
                 <TableHead>Status</TableHead>
                 {isManager && <TableHead className="w-[60px]" />}
@@ -175,14 +189,17 @@ export default function Payroll() {
                       <p className="text-xs text-muted-foreground">{s.employeeNo}</p>
                     </TableCell>
                     <TableCell className="text-right whitespace-nowrap">{formatRupiah(s.baseSalary)}</TableCell>
-                    <TableCell className="text-right hidden md:table-cell whitespace-nowrap">
+                    <TableCell className="text-right whitespace-nowrap">
+                      <span className="md:hidden text-muted-foreground mr-2 font-normal text-xs">Tunjangan:</span>
                       {formatRupiah(s.allowance + s.overtime + s.bonus)}
                     </TableCell>
-                    <TableCell className="text-right hidden md:table-cell whitespace-nowrap">
-                      {formatRupiah(s.deduction)}
+                    <TableCell className="text-right whitespace-nowrap text-red-600">
+                      <span className="md:hidden text-muted-foreground mr-2 font-normal text-xs">Potongan:</span>
+                      -{formatRupiah(s.deduction)}
                     </TableCell>
-                    <TableCell className="text-right hidden lg:table-cell whitespace-nowrap">
-                      {formatRupiah(s.tax)}
+                    <TableCell className="text-right whitespace-nowrap text-amber-600">
+                      <span className="lg:hidden text-muted-foreground mr-2 font-normal text-xs">Pajak:</span>
+                      -{formatRupiah(s.tax)}
                     </TableCell>
                     <TableCell className="text-right font-semibold whitespace-nowrap">
                       {formatRupiah(s.netSalary)}

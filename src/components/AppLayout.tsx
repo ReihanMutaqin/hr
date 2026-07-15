@@ -40,7 +40,7 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "hr", "employee"] },
+  { to: "/", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "hr"] },
   { to: "/employees", label: "Karyawan", icon: Users, roles: ["admin", "hr"] },
   { to: "/organization", label: "Organisasi", icon: Building2, roles: ["admin", "hr"] },
   { to: "/recruitment", label: "Rekrutmen & AI", icon: Briefcase, roles: ["admin", "hr"] },
