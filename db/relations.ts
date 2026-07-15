@@ -11,7 +11,7 @@ import {
   leaveRequests,
   payslips,
   performanceReviews,
-} from "./schema";
+} from "./schema.js";
 
 export const departmentsRelations = relations(departments, ({ many }) => ({
   positions: many(positions),
