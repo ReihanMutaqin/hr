@@ -81,15 +81,27 @@ ${cvText}
         fallback: false,
       };
     } else {
-      console.error(`[cvReader] OpenRouter HTTP ${res.status}: ${await res.text()}`);
-    }
-  } catch (err) {
-    console.error("[cvReader] OpenRouter request failed:", err);
-  }
+      const errorText = await res.text();
+      console.error(`[cvReader] OpenRouter HTTP ${res.status}: ${errorText}`);
+      
+      let parsedError = errorText;
+      try {
+        const errorJson = JSON.parse(errorText);
+        parsedError = errorJson.error?.message || errorText;
+      } catch (e) {}
 
-  return {
-    opinion: "Gagal terhubung ke layanan AI saat ini. Silakan coba beberapa saat lagi.",
-    model: "error-fallback",
-    fallback: true,
-  };
+      return {
+        opinion: `Gagal terhubung ke layanan AI (HTTP ${res.status}).\nPesan Error: ${parsedError}`,
+        model: "error-fallback",
+        fallback: true,
+      };
+    }
+  } catch (err: any) {
+    console.error("[cvReader] OpenRouter request failed:", err);
+    return {
+      opinion: `Gagal mengirim request ke AI. Detail: ${err.message}`,
+      model: "error-fallback",
+      fallback: true,
+    };
+  }
 }
