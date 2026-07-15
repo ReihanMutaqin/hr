@@ -1,28 +1,10 @@
 /**
  * api/index.ts — Vercel Serverless Function Entry Point
  *
- * This file is the single entry point for all /api/* requests on Vercel.
- * It wraps the Hono app so Vercel can run it as a serverless function.
+ * This file is the ONLY entry point in the `api/` directory.
+ * Vercel treats all files in `api/` as separate Serverless Functions.
+ * By moving the rest of the backend to `server/`, we stay within Vercel's 12-function limit (Hobby plan).
  */
-import { Hono } from "hono";
-import { bodyLimit } from "hono/body-limit";
-import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { appRouter } from "./router.js";
-import { createContext } from "./context.js";
-
-const app = new Hono();
-
-app.use(bodyLimit({ maxSize: 50 * 1024 * 1024 }));
-
-app.use("/api/trpc/*", async (c) => {
-  return fetchRequestHandler({
-    endpoint: "/api/trpc",
-    req: c.req.raw,
-    router: appRouter,
-    createContext,
-  });
-});
-
-app.all("/api/*", (c) => c.json({ error: "Not Found" }, 404));
+import app from "../server/index.js";
 
 export default app;

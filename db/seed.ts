@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
-import { getDb } from "../api/queries/connection";
-import { hashPassword } from "../api/auth";
+import { getDb } from "../server/queries/connection.js";
+import { hashPassword } from "../server/auth.js";
 import {
   users,
   departments,
@@ -58,7 +58,7 @@ async function seed() {
   ];
   await db.insert(departments).values(deptData);
   const deptRows = await db.select().from(departments);
-  const deptId = (name: string) => deptRows.find((x) => x.name === name)!.id;
+  const deptId = (name: string) => deptRows.find((x: any) => x.name === name)!.id;
 
   /* ---------------- Positions ---------------- */
   const posData = [
@@ -85,7 +85,7 @@ async function seed() {
   ];
   await db.insert(positions).values(posData);
   const posRows = await db.select().from(positions);
-  const posId = (title: string) => posRows.find((x) => x.title === title)!.id;
+  const posId = (title: string) => posRows.find((x: any) => x.title === title)!.id;
 
   /* ---------------- Employees ---------------- */
   const empData = [
@@ -116,7 +116,7 @@ async function seed() {
   ];
   await db.insert(employees).values(empData);
   const empRows = await db.select().from(employees);
-  const empId = (no: string) => empRows.find((x) => x.employeeNo === no)!.id;
+  const empId = (no: string) => empRows.find((x: any) => x.employeeNo === no)!.id;
 
   // set managers
   for (const e of empRows) {
@@ -198,7 +198,7 @@ async function seed() {
   ];
   await db.insert(jobPostings).values(jobData);
   const jobRows = await db.select().from(jobPostings);
-  const jobId = (title: string) => jobRows.find((x) => x.title === title)!.id;
+  const jobId = (title: string) => jobRows.find((x: any) => x.title === title)!.id;
 
   /* ---------------- Candidates (with realistic CV texts) ---------------- */
   const candData = [
@@ -229,7 +229,7 @@ async function seed() {
   await db.insert(candidates).values(candData);
 
   /* ---------------- Attendance (last 10 working days) ---------------- */
-  const activeEmps = empRows.filter((e) => e.status === "active");
+  const activeEmps = empRows.filter((e: any) => e.status === "active");
   const attValues = [];
   for (let dayOffset = -13; dayOffset <= 0; dayOffset++) {
     const date = new Date();
@@ -328,7 +328,7 @@ async function seed() {
   process.exit(0);
 }
 
-seed().catch((e) => {
+seed().catch((e: any) => {
   console.error("Seed failed:", e);
   process.exit(1);
 });
