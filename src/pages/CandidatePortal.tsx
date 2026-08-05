@@ -16,7 +16,6 @@ import {
   Mail, 
   Phone, 
   Globe, 
-  Sparkles, 
   ShieldCheck, 
   Clock, 
   Award, 
@@ -120,7 +119,7 @@ export default function CandidatePortal() {
       const wordCount = cvText.trim().split(/\s+/).length;
       setExtractedWordCount(wordCount);
       setExtractSuccess(true);
-      toast.success(`CV Berhasil Dibaca! (${wordCount} kata terdeteksi oleh AI NexusHR)`);
+      toast.success(`CV Berhasil Dibaca! (${wordCount} kata terdeteksi)`);
     } catch (err: any) {
       setFile(null);
       toast.error(err.message || "Gagal membaca PDF. Pastikan file tidak terkunci password.");
@@ -218,7 +217,7 @@ export default function CandidatePortal() {
             <div className="flex justify-between text-sm py-1">
               <span className="text-slate-500">Status Proses:</span>
               <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full text-xs">
-                <Sparkles className="w-3 h-3" /> AI Screening Active
+                <CheckCircle2 className="w-3 h-3" /> Dalam Peninjauan HR
               </span>
             </div>
           </div>
@@ -228,8 +227,8 @@ export default function CandidatePortal() {
               <Clock className="w-4 h-4 text-indigo-600" /> Tahap Selanjutnya
             </h4>
             <ul className="text-xs text-indigo-800 space-y-1.5 list-disc list-inside">
-              <li>Sistem AI NexusHR akan menganalisis kecocokan profil & CV Anda.</li>
-              <li>Tim Talent Acquisition akan meninjau berkas dalam 1–3 hari kerja.</li>
+              <li>Tim Talent Acquisition NexusHR akan meninjau profil & CV Anda.</li>
+              <li>Tim HR akan mengonfirmasi berkas Anda dalam 1–3 hari kerja.</li>
               <li>Undangan seleksi berikutnya akan dikirimkan langsung ke email Anda.</li>
             </ul>
           </div>
@@ -409,7 +408,7 @@ export default function CandidatePortal() {
                   </div>
                   <div className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                    <span>Budget pengembangan skill, sertifikasi, & pelatihan AI</span>
+                    <span>Budget pengembangan skill, sertifikasi, & pelatihan profesional</span>
                   </div>
                 </div>
               </div>
@@ -419,11 +418,11 @@ export default function CandidatePortal() {
             <div ref={formRef} className="bg-white rounded-3xl border border-indigo-100 shadow-md p-6 sm:p-8 space-y-6 scroll-mt-20">
               <div className="border-b border-slate-100 pb-5">
                 <div className="flex items-center gap-2 text-indigo-600 font-semibold text-xs uppercase tracking-wider mb-1">
-                  <Sparkles className="w-4 h-4" /> Formulir Pendaftaran AI HR
+                  Formulir Pendaftaran Resmi
                 </div>
                 <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Lamar Posisi Ini</h2>
                 <p className="text-sm text-slate-500 mt-1">
-                  Lengkapi informasi data diri dan unggah CV PDF Anda untuk diproses oleh sistem rekrutmen NexusHR.
+                  Lengkapi informasi data diri dan unggah CV PDF Anda untuk diproses oleh tim rekrutmen NexusHR.
                 </p>
               </div>
 
@@ -590,7 +589,7 @@ export default function CandidatePortal() {
                               </span>
                             ) : extractSuccess ? (
                               <span className="text-emerald-600 font-semibold flex items-center gap-1">
-                                <CheckCircle2 className="w-3 h-3" /> AI Ready ({extractedWordCount} kata)
+                                <CheckCircle2 className="w-3 h-3" /> CV Terbaca ({extractedWordCount} kata)
                               </span>
                             ) : null}
                           </div>
@@ -635,7 +634,7 @@ export default function CandidatePortal() {
                 >
                   {isExtracting ? (
                     <span className="flex items-center gap-2">
-                      <Loader2 className="w-5 h-5 animate-spin" /> Menganalisis Berkas CV...
+                      <Loader2 className="w-5 h-5 animate-spin" /> Memeriksa Berkas CV...
                     </span>
                   ) : apply.isPending ? (
                     <span className="flex items-center gap-2">
@@ -690,7 +689,7 @@ export default function CandidatePortal() {
             {/* Hiring Process Card */}
             <div className="bg-gradient-to-br from-indigo-900 to-slate-900 rounded-3xl p-6 text-white space-y-4 shadow-md">
               <div className="flex items-center gap-2 text-indigo-300 font-semibold text-xs uppercase tracking-wider">
-                <Zap className="w-4 h-4 text-amber-400" /> Proses Rekrutmen AI
+                <Zap className="w-4 h-4 text-amber-400" /> Proses Rekrutmen
               </div>
               <h3 className="font-bold text-lg leading-tight">4 Langkah Seleksi Mudah</h3>
               
@@ -710,8 +709,8 @@ export default function CandidatePortal() {
                     2
                   </div>
                   <div>
-                    <p className="font-semibold text-white">AI Screening & Rerank</p>
-                    <p className="text-slate-400 mt-0.5">Sistem AI memverifikasi kecocokan skill secara presisi.</p>
+                    <p className="font-semibold text-white">Screening Berkas & Profil</p>
+                    <p className="text-slate-400 mt-0.5">Tim HR memverifikasi kualifikasi & kecocokan pengalaman Anda.</p>
                   </div>
                 </div>
 
@@ -758,7 +757,7 @@ export default function CandidatePortal() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <div className="flex items-center gap-2">
             <span className="font-bold text-slate-800">NexusHR</span>
-            <span>• Modern HR & AI Recruitment Platform</span>
+            <span>• Modern HR Career Platform</span>
           </div>
           <p>© {new Date().getFullYear()} NexusHR System. All rights reserved.</p>
         </div>
