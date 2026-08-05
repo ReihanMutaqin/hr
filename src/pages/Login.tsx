@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Sparkles, LogIn, AlertCircle } from "lucide-react";
+import { Building2, LogIn, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,15 +31,15 @@ export default function Login() {
 
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-slate-900 p-4">
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-400 to-violet-500 shadow-xl">
-            <Sparkles className="h-7 w-7 text-white" />
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 shadow-xl">
+            <Building2 className="h-7 w-7 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white">NexusHR</h1>
+          <h1 className="text-2xl font-bold text-white tracking-tight">NexusHR</h1>
           <p className="mt-1 text-sm text-slate-400">
-            Sistem Manajemen HR dengan AI Rerank
+            Platform Manajemen SDM & Talenta Enterprise
           </p>
         </div>
 

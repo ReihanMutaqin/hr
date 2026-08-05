@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Sparkles, TrendingUp, Trophy, Medal, Award, Trash2 } from "lucide-react";
+import { Plus, BarChart3, TrendingUp, Trophy, Medal, Award, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -106,7 +106,7 @@ export default function Performance() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Performance Review</h1>
           <p className="text-sm text-muted-foreground">
-            Penilaian kinerja dengan peringkat otomatis AI rerank
+            Penilaian kinerja & evaluasi kualifikasi pegawai
           </p>
         </div>
         {isManager && (
@@ -114,10 +114,10 @@ export default function Performance() {
             <Button
               onClick={() => aiRank.mutate({ period: periodFilter !== "all" ? periodFilter : undefined, criteria: criteria || undefined })}
               disabled={aiRank.isPending}
-              className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700"
+              className="bg-indigo-600 hover:bg-indigo-700"
             >
-              <Sparkles className="mr-2 h-4 w-4" />
-              {aiRank.isPending ? "AI menganalisis..." : "Ranking AI"}
+              <TrendingUp className="mr-2 h-4 w-4" />
+              {aiRank.isPending ? "Menganalisis..." : "Evaluasi Peringkat"}
             </Button>
             <Button variant="outline" onClick={() => setDialog(true)}>
               <Plus className="mr-2 h-4 w-4" /> Tambah Review
@@ -127,14 +127,15 @@ export default function Performance() {
       </div>
 
       {isManager && (
-        <Card className="border-indigo-200 bg-indigo-50/50">
-          <CardContent className="flex flex-wrap items-center gap-3 p-4">
-            <Sparkles className="h-4 w-4 text-indigo-600" />
-            <Input
+        <Card className="bg-slate-50/80 border-slate-200">
+          <CardContent className="p-3 text-xs flex flex-wrap items-center gap-2">
+            <span className="font-semibold text-slate-700">Kriteria Evaluasi Kinerja:</span>
+            <input
+              type="text"
+              placeholder="Contoh: Produktivitas tinggi, kepemimpinan proyek, komunikasi (opsional)"
               value={criteria}
               onChange={(e) => setCriteria(e.target.value)}
-              placeholder="Kriteria penilaian kustom (opsional) — kosongkan untuk kriteria standar: target, produktivitas, kualitas, kolaborasi..."
-              className="flex-1 min-w-[260px] bg-white"
+              className="flex-1 min-w-[260px] bg-white border border-slate-300 rounded px-2 py-1 text-xs outline-none focus:border-indigo-500"
             />
           </CardContent>
         </Card>
@@ -153,35 +154,30 @@ export default function Performance() {
       </div>
 
       <Card>
-        <CardContent className="p-0 overflow-x-auto">
+        <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Karyawan</TableHead>
                 <TableHead>Periode</TableHead>
-                <TableHead className="hidden lg:table-cell">Reviewer</TableHead>
-                <TableHead className="text-center">Skor Reviewer</TableHead>
-                <TableHead className="text-center">Skor AI</TableHead>
+                <TableHead>Reviewer</TableHead>
+                <TableHead className="text-right">Skor Reviewer</TableHead>
                 <TableHead>Status</TableHead>
-                {isManager && <TableHead className="w-[60px]" />}
+                <TableHead className="w-[80px]" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-8 text-center text-sm text-muted-foreground">
-                    Memuat...
+                  <TableCell colSpan={6} className="h-24 text-center">Loading...</TableCell>
+                </TableRow>
+              ) : (reviews ?? []).length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                    Belum ada review kinerja
                   </TableCell>
                 </TableRow>
               ) : (
-                reviews?.map((r) => (
-                  <TableRow key={r.id}>
-                    <TableCell>
-                      <p className="font-medium">{r.employeeName}</p>
-                      <p className="text-xs text-muted-foreground">{r.departmentName ?? "-"}</p>
-                    </TableCell>
-                    <TableCell>{r.period}</TableCell>
-                    <TableCell className="hidden lg:table-cell">{r.reviewerName}</TableCell>
                     <TableCell className="text-center">
                       <Badge variant="outline">{r.reviewerScore}</Badge>
                     </TableCell>

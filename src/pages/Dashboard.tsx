@@ -259,8 +259,8 @@ export default function Dashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <Sparkles className="h-4 w-4 text-indigo-500" />
-                Aktivitas AI Rerank
+                <TrendingUp className="h-4 w-4 text-indigo-600" />
+                Aktivitas Evaluasi Rekrutmen
               </CardTitle>
               <CardDescription>Riwayat pemeringkatan terakhir</CardDescription>
             </CardHeader>
@@ -268,7 +268,7 @@ export default function Dashboard() {
               <div className="space-y-3">
                 {(aiLogs ?? []).slice(0, 5).map((log) => (
                   <div key={log.id} className="flex items-start gap-2.5 text-sm">
-                    <Activity className="mt-0.5 h-3.5 w-3.5 shrink-0 text-indigo-400" />
+                    <Activity className="mt-0.5 h-3.5 w-3.5 shrink-0 text-indigo-500" />
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
                         <Badge variant="outline" className="text-[10px]">
@@ -277,14 +277,14 @@ export default function Dashboard() {
                         <span className="text-[11px] text-muted-foreground">{log.docCount} dok</span>
                       </div>
                       <p className="truncate text-xs text-muted-foreground">
-                        {log.fallback ? "Fallback keyword" : "Nemotron"} · {formatDateTime(log.createdAt)}
+                        {log.fallback ? "Standard Keyword" : "Smart Rerank"} · {formatDateTime(log.createdAt)}
                       </p>
                     </div>
                   </div>
                 ))}
                 {(aiLogs ?? []).length === 0 && (
                   <p className="py-6 text-center text-sm text-muted-foreground">
-                    Belum ada aktivitas AI. Coba fitur rerank di menu Rekrutmen.
+                    Belum ada aktivitas evaluasi. Coba fitur evaluasi di menu Rekrutmen & Talent.
                   </p>
                 )}
               </div>

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   Plus,
-  Sparkles,
   Briefcase,
   MapPin,
   Users as UsersIcon,
@@ -11,7 +10,10 @@ import {
   Trophy,
   Medal,
   Award,
-  Bot,
+  BarChart3,
+  TrendingUp,
+  UserCheck,
+  FileSearch,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -251,9 +253,9 @@ export default function Recruitment() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Rekrutmen & AI Screening</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Rekrutmen & Seleksi</h1>
           <p className="text-sm text-muted-foreground">
-            Kelola lowongan dan peringkat kandidat otomatis dengan AI rerank
+            Kelola lowongan, data pelamar, dan penilaian kualifikasi kandidat
           </p>
         </div>
         <Button onClick={() => openJobDialog()}>
@@ -358,10 +360,10 @@ export default function Recruitment() {
                     <Button
                       onClick={() => rerank.mutate({ jobId: selectedJob.id })}
                       disabled={rerank.isPending || selectedJob.candidateCount === 0}
-                      className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700"
+                      className="bg-indigo-600 hover:bg-indigo-700"
                     >
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      {rerank.isPending ? "AI sedang menganalisis CV..." : "Rerank Kandidat dengan AI"}
+                      <TrendingUp className="mr-2 h-4 w-4" />
+                      {rerank.isPending ? "Mengevaluasi dokumen..." : "Evaluasi Match Kandidat"}
                     </Button>
                     <Button
                       variant="outline"
@@ -384,7 +386,7 @@ export default function Recruitment() {
                         <TableHead>Kandidat</TableHead>
                         <TableHead className="hidden md:table-cell">Sumber</TableHead>
                         <TableHead className="hidden md:table-cell">Melamar</TableHead>
-                        <TableHead>Skor AI</TableHead>
+                        <TableHead>Skor Match</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="w-[90px]" />
                       </TableRow>
@@ -401,21 +403,26 @@ export default function Recruitment() {
                             {formatDate(cand.appliedAt)}
                           </TableCell>
                           <TableCell>
-                            {cand.aiScore ? (
+                            {cand.aiScore !== null && cand.aiScore !== undefined ? (
                               <Popover>
                                 <PopoverTrigger asChild>
-                                  <Badge className="bg-indigo-600 w-fit cursor-pointer hover:bg-indigo-700 transition-colors">
-                                    <Sparkles className="mr-1 h-3 w-3" />
-                                    {Number(cand.aiScore).toFixed(0)}
+                                  <Badge variant="outline" className={
+                                    Number(cand.aiScore) >= 75
+                                      ? "bg-emerald-50 text-emerald-700 border-emerald-200 font-medium text-xs cursor-pointer hover:bg-emerald-100 transition-colors"
+                                      : Number(cand.aiScore) >= 50
+                                      ? "bg-blue-50 text-blue-700 border-blue-200 font-medium text-xs cursor-pointer hover:bg-blue-100 transition-colors"
+                                      : "bg-slate-100 text-slate-700 border-slate-200 font-medium text-xs cursor-pointer hover:bg-slate-200 transition-colors"
+                                  }>
+                                    {Number(cand.aiScore).toFixed(0)}% Match
                                   </Badge>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-80 p-4 text-sm whitespace-pre-wrap">
-                                  <span className="font-semibold block mb-2 text-indigo-800 border-b pb-1">Kesimpulan Rerank AI</span>
-                                  {cand.aiNote || "Tidak ada kesimpulan tersimpan."}
+                                  <span className="font-semibold block mb-2 text-slate-800 border-b pb-1">Analisis Evaluator</span>
+                                  {cand.aiNote || "Tidak ada catatan evaluasi tersimpan."}
                                 </PopoverContent>
                               </Popover>
                             ) : (
-                              <span className="text-xs text-muted-foreground">belum</span>
+                              <span className="text-xs text-muted-foreground">-</span>
                             )}
                           </TableCell>
                           <TableCell>
@@ -443,7 +450,7 @@ export default function Recruitment() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                title="Minta Pendapat AI"
+                                title="Analisis Kualifikasi"
                                 className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
                                 disabled={evaluateAI.isPending}
                                 onClick={() => {
@@ -459,7 +466,7 @@ export default function Recruitment() {
                                   }
                                 }}
                               >
-                                <Bot className="h-4 w-4" />
+                                <FileSearch className="h-4 w-4" />
                               </Button>
                               <Button
                                 variant="ghost"
@@ -508,18 +515,16 @@ export default function Recruitment() {
         </div>
       </div>
 
-      {/* AI ranking dialog */}
+      {/* Candidate ranking dialog */}
       <Dialog open={rankingDialog} onOpenChange={setRankingDialog}>
         <DialogContent className="max-h-[90vh] sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-indigo-500" />
-              Hasil AI Rerank — {ranking?.jobTitle}
+            <DialogTitle className="flex items-center gap-2 text-slate-900">
+              <BarChart3 className="h-5 w-5 text-indigo-600" />
+              Hasil Evaluasi & Peringkat Kandidat — {ranking?.jobTitle}
             </DialogTitle>
             <DialogDescription>
-              Kandidat diperingkat oleh{" "}
-              {ranking?.fallback ? "fallback keyword" : "NVIDIA Llama Nemotron Rerank"} · skor 0–100
-              relatif terhadap kandidat terbaik
+              Peringkat kandidat berdasarkan kualifikasi dan tingkat kesesuaian profil.
             </DialogDescription>
           </DialogHeader>
           <ScrollArea className="max-h-[60vh] pr-3">
@@ -537,21 +542,28 @@ export default function Recruitment() {
                     <div className="flex items-center gap-2">
                       <div className="h-2 w-24 overflow-hidden rounded-full bg-slate-100">
                         <div
-                          className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500"
+                          className="h-full rounded-full bg-indigo-600"
                           style={{ width: `${Math.max(4, r.score)}%` }}
                         />
                       </div>
                       <Badge 
-                        className="bg-indigo-600 w-12 justify-center cursor-pointer hover:bg-indigo-700 transition-colors"
+                        variant="outline"
+                        className={
+                          r.score >= 75
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200 w-16 justify-center cursor-pointer hover:bg-emerald-100 font-medium"
+                            : r.score >= 50
+                            ? "bg-blue-50 text-blue-700 border-blue-200 w-16 justify-center cursor-pointer hover:bg-blue-100 font-medium"
+                            : "bg-slate-100 text-slate-700 border-slate-200 w-16 justify-center cursor-pointer hover:bg-slate-200 font-medium"
+                        }
                         onClick={() => setExpandedReasoningId(expandedReasoningId === r.candidate.id ? null : r.candidate.id)}
                       >
-                        {r.score.toFixed(0)}
+                        {r.score.toFixed(0)}%
                       </Badge>
                     </div>
                   </div>
                   {expandedReasoningId === r.candidate.id && r.reasoning && (
-                    <div className="mt-3 ml-11 rounded-md bg-indigo-50/50 p-3 text-sm text-indigo-900 border border-indigo-100/50 whitespace-pre-wrap">
-                      <span className="font-semibold block mb-1 text-indigo-800">Kesimpulan AI:</span>
+                    <div className="mt-3 ml-11 rounded-md bg-slate-50 p-3 text-sm text-slate-800 border border-slate-200 whitespace-pre-wrap">
+                      <span className="font-semibold block mb-1 text-slate-900">Analisis Evaluator:</span>
                       {r.reasoning}
                     </div>
                   )}
@@ -565,16 +577,16 @@ export default function Recruitment() {
         </DialogContent>
       </Dialog>
 
-      {/* AI Opinion Dialog */}
+      {/* Candidate Evaluation Dialog */}
       <Dialog open={aiOpinionDialog?.open ?? false} onOpenChange={(open) => !open && setAiOpinionDialog(null)}>
         <DialogContent className="max-h-[85vh] sm:max-w-2xl flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Bot className="h-5 w-5 text-indigo-500" />
-              Pendapat AI: {aiOpinionDialog?.candidateName}
+              <UserCheck className="h-5 w-5 text-indigo-600" />
+              Analisis Kualifikasi: {aiOpinionDialog?.candidateName}
             </DialogTitle>
             <DialogDescription>
-              Analisis kualitatif kecocokan kandidat dengan lowongan ini.
+              Analisis kualitatif kecocokan kandidat dengan persyaratan posisi.
             </DialogDescription>
           </DialogHeader>
           <ScrollArea className="flex-1 pr-4 mt-2">

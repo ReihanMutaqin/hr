@@ -212,13 +212,13 @@ export default function Employees() {
         </Button>
       </div>
 
-      {/* AI semantic search */}
-      <Card className="border-indigo-200 bg-gradient-to-r from-indigo-50 to-violet-50">
+      {/* Smart talent search */}
+      <Card className="border-slate-200 bg-slate-50/80">
         <CardContent className="p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="h-4 w-4 text-indigo-600" />
-            <span className="text-sm font-semibold text-indigo-900">Pencarian AI Semantik</span>
-            <span className="text-xs text-indigo-500">powered by Nemotron Rerank</span>
+            <Search className="h-4 w-4 text-indigo-600" />
+            <span className="text-sm font-semibold text-slate-800">Pencarian Kualifikasi & Skill</span>
+            <span className="text-xs text-slate-500 font-normal">Smart Talent Match</span>
           </div>
           <div className="flex gap-2">
             <Input

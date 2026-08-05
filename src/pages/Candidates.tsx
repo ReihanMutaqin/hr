@@ -156,7 +156,7 @@ export default function Candidates() {
                 <TableHead>Lowongan</TableHead>
                 <TableHead>Sumber</TableHead>
                 <TableHead>Tanggal Apply</TableHead>
-                <TableHead>Skor AI</TableHead>
+                <TableHead>Skor Match</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-[100px]">Aksi</TableHead>
               </TableRow>
@@ -184,13 +184,18 @@ export default function Candidates() {
                     <TableCell className="text-sm">{cand.source ?? "-"}</TableCell>
                     <TableCell className="text-sm">{formatDate(cand.appliedAt)}</TableCell>
                     <TableCell>
-                      {cand.aiScore ? (
-                        <Badge className="bg-indigo-600 w-fit">
-                          <Sparkles className="mr-1 h-3 w-3" />
-                          {Number(cand.aiScore).toFixed(0)}
+                      {cand.aiScore !== null && cand.aiScore !== undefined ? (
+                        <Badge variant="outline" className={
+                          Number(cand.aiScore) >= 75
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200 font-medium text-xs"
+                            : Number(cand.aiScore) >= 50
+                            ? "bg-blue-50 text-blue-700 border-blue-200 font-medium text-xs"
+                            : "bg-slate-100 text-slate-700 border-slate-200 font-medium text-xs"
+                        }>
+                          {Number(cand.aiScore).toFixed(0)}% Match
                         </Badge>
                       ) : (
-                        <span className="text-xs text-muted-foreground">belum ada</span>
+                        <span className="text-xs text-muted-foreground">-</span>
                       )}
                     </TableCell>
                     <TableCell>

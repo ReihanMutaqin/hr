@@ -43,7 +43,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "hr"] },
   { to: "/employees", label: "Karyawan", icon: Users, roles: ["admin", "hr"] },
   { to: "/organization", label: "Organisasi", icon: Building2, roles: ["admin", "hr"] },
-  { to: "/recruitment", label: "Rekrutmen & AI", icon: Briefcase, roles: ["admin", "hr"] },
+  { to: "/recruitment", label: "Rekrutmen & Talent", icon: Briefcase, roles: ["admin", "hr"] },
   { to: "/candidates", label: "Kandidat", icon: FileUser, roles: ["admin", "hr"] },
   { to: "/attendance", label: "Absensi", icon: CalendarCheck, roles: ["admin", "hr", "employee"] },
   { to: "/leave", label: "Cuti", icon: CalendarDays, roles: ["admin", "hr", "employee"] },
@@ -86,12 +86,12 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
 function SidebarBrand() {
   return (
     <div className="flex items-center gap-2.5 px-5 py-5">
-      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-400 to-violet-500 shadow-lg">
-        <Sparkles className="h-5 w-5 text-white" />
+      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 shadow-md">
+        <Building2 className="h-5 w-5 text-white" />
       </div>
       <div>
         <div className="text-base font-bold text-white tracking-tight">NexusHR</div>
-        <div className="text-[11px] text-slate-400">AI-Powered HR Management</div>
+        <div className="text-[11px] text-slate-400">Enterprise HR Platform</div>
       </div>
     </div>
   );
@@ -148,9 +148,9 @@ export default function AppLayout() {
 
           <div className="flex-1" />
 
-          <Badge variant="outline" className="hidden sm:inline-flex gap-1.5 border-indigo-200 bg-indigo-50 text-indigo-700">
-            <Sparkles className="h-3 w-3" />
-            AI Rerank Aktif
+          <Badge variant="outline" className="hidden sm:inline-flex items-center gap-1.5 border-emerald-200 bg-emerald-50/80 text-emerald-700 font-normal text-xs px-2.5 py-1">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            Smart Evaluation Active
           </Badge>
 
           <DropdownMenu>
