@@ -20,8 +20,8 @@ export const recruitmentRouter = createRouter({
         .leftJoin(departments, eq(jobPostings.departmentId, departments.id))
         .where(eq(jobPostings.id, input.id))
         .limit(1);
-      if (!job || job.job.status !== "open") {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Lowongan tidak ditemukan atau sudah ditutup" });
+      if (!job || (job.job.status !== "open" && job.job.status !== "closed")) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Lowongan tidak ditemukan" });
       }
       return {
         ...job.job,
