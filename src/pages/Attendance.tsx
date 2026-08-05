@@ -19,7 +19,8 @@ import {
   Sun,
   Sunset,
   Moon,
-  AlertTriangle
+  AlertTriangle,
+  Calendar
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -188,7 +189,7 @@ export default function Attendance() {
             }
           } catch (err) {
             console.warn("Reverse geocoding error:", err);
-          } fontFinally: {
+          } finally {
             setGpsLoading(false);
           }
         },
@@ -294,19 +295,21 @@ export default function Attendance() {
   return (
     <div className="space-y-6 pb-8">
       
-      {/* Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Presensi & Absensi Karyawan</h1>
-          <p className="text-sm text-slate-500 mt-1">
+      {/* Mobile Optimized Header Bar */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-xs">
+        <div className="space-y-1">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Presensi & Absensi Karyawan</h1>
+          <p className="text-xs sm:text-sm text-slate-500">
             {isManager 
               ? "Kelola presensi seluruh karyawan berdasarkan shift kerja, foto selfie, & lokasi GPS" 
               : "Riwayat presensi kehadiran pribadi berbasis Shift Kerja, Foto Selfie, & Lokasi GPS"}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+
+        {/* Action Buttons: Full width grid on mobile for easy thumb tapping */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex items-center gap-2 w-full lg:w-auto">
           {isManager && (
-            <Button variant="outline" className="border-slate-200 text-slate-700 rounded-xl" onClick={() => setMarkDialog(true)}>
+            <Button variant="outline" className="border-slate-200 text-slate-700 rounded-xl h-11 text-xs" onClick={() => setMarkDialog(true)}>
               <Plus className="mr-2 h-4 w-4" /> Catat Manual HR
             </Button>
           )}
@@ -314,68 +317,68 @@ export default function Attendance() {
             <>
               <Button 
                 onClick={() => startCameraAndGps("checkIn")} 
-                className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-md shadow-blue-600/20"
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-md shadow-blue-600/20 h-12 sm:h-11 text-sm sm:text-xs"
               >
-                <Camera className="mr-2 h-4 w-4" /> Absen Masuk (Foto & GPS)
+                <Camera className="mr-2 h-4.5 w-4.5" /> Absen Masuk (Foto & GPS)
               </Button>
               <Button 
                 variant="secondary" 
                 onClick={() => startCameraAndGps("checkOut")} 
-                className="bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold border border-slate-200"
+                className="bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold border border-slate-200 h-12 sm:h-11 text-sm sm:text-xs"
               >
-                <LogOut className="mr-2 h-4 w-4 text-amber-600" /> Absen Keluar (Foto & GPS)
+                <LogOut className="mr-2 h-4.5 w-4.5 text-amber-600" /> Absen Keluar (Foto & GPS)
               </Button>
             </>
           )}
         </div>
       </div>
 
-      {/* Summary KPI Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Summary KPI Cards Grid */}
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         <Card className="border-slate-200 shadow-xs">
-          <CardContent className="flex items-center gap-3.5 p-5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 shrink-0">
-              <CalendarCheck className="h-5.5 w-5.5" />
+          <CardContent className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 sm:p-5">
+            <div className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 shrink-0">
+              <CalendarCheck className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Karyawan Aktif</p>
-              <p className="text-2xl font-extrabold text-slate-900 mt-0.5">{summary?.activeEmployees ?? "-"}</p>
+              <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Karyawan Aktif</p>
+              <p className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">{summary?.activeEmployees ?? "-"}</p>
             </div>
           </CardContent>
         </Card>
 
         <Card className="border-slate-200 shadow-xs">
-          <CardContent className="flex items-center gap-3.5 p-5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 shrink-0">
-              <UserCheck className="h-5.5 w-5.5" />
+          <CardContent className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 sm:p-5">
+            <div className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 shrink-0">
+              <UserCheck className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Hadir Tepat Waktu</p>
-              <p className="text-2xl font-extrabold text-slate-900 mt-0.5">{statusCount("present")}</p>
+              <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Hadir Tepat Waktu</p>
+              <p className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">{statusCount("present")}</p>
             </div>
           </CardContent>
         </Card>
 
         <Card className="border-slate-200 shadow-xs">
-          <CardContent className="flex items-center gap-3.5 p-5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-600 shrink-0">
-              <Clock className="h-5.5 w-5.5" />
+          <CardContent className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 sm:p-5">
+            <div className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-600 shrink-0">
+              <Clock className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Terlambat</p>
-              <p className="text-2xl font-extrabold text-slate-900 mt-0.5">{statusCount("late")}</p>
+              <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Terlambat</p>
+              <p className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">{statusCount("late")}</p>
             </div>
           </CardContent>
         </Card>
 
         <Card className="border-slate-200 shadow-xs">
-          <CardContent className="flex items-center gap-3.5 p-5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-50 text-rose-600 shrink-0">
-              <UserX className="h-5.5 w-5.5" />
+          <CardContent className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 sm:p-5">
+            <div className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl bg-rose-50 text-rose-600 shrink-0">
+              <UserX className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Alpa / Cuti / Sakit</p>
-              <p className="text-2xl font-extrabold text-slate-900 mt-0.5">
+              <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Alpa / Cuti / Sakit</p>
+              <p className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">
                 {statusCount("absent") + statusCount("leave") + statusCount("sick")}
               </p>
             </div>
@@ -385,21 +388,21 @@ export default function Attendance() {
 
       {/* Date & Employee Filters */}
       <div className="flex flex-wrap items-end gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-        <div className="space-y-1">
+        <div className="space-y-1 flex-1 sm:flex-none">
           <Label className="text-xs font-semibold text-slate-700">Periode Dari</Label>
-          <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="w-[160px] rounded-xl text-xs" />
+          <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="w-full sm:w-[160px] rounded-xl text-xs" />
         </div>
-        <div className="space-y-1">
+        <div className="space-y-1 flex-1 sm:flex-none">
           <Label className="text-xs font-semibold text-slate-700">Sampai</Label>
-          <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="w-[160px] rounded-xl text-xs" />
+          <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="w-full sm:w-[160px] rounded-xl text-xs" />
         </div>
 
         {/* HR ONLY: Filter Employee */}
         {isManager && (
-          <div className="space-y-1">
+          <div className="space-y-1 w-full sm:w-auto">
             <Label className="text-xs font-semibold text-slate-700">Filter Karyawan (Khusus HR)</Label>
             <Select value={empFilter} onValueChange={setEmpFilter}>
-              <SelectTrigger className="w-[220px] rounded-xl text-xs"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-[220px] rounded-xl text-xs"><SelectValue /></SelectTrigger>
               <SelectContent className="rounded-xl">
                 <SelectItem value="all">Semua Karyawan</SelectItem>
                 {employees?.map((e) => (
@@ -411,8 +414,94 @@ export default function Attendance() {
         )}
       </div>
 
-      {/* Main Attendance Records Table */}
-      <Card className="border-slate-200 shadow-xs overflow-hidden">
+      {/* MOBILE LIST VIEW (Shown on small screens for smartphone users) */}
+      <div className="block sm:hidden space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <h2 className="text-sm font-bold text-slate-900">
+            {isManager ? "Riwayat Presensi Karyawan" : "Riwayat Presensi Saya"}
+          </h2>
+          <span className="text-xs text-slate-400 font-medium">({records?.length ?? 0} Record)</span>
+        </div>
+
+        {isLoading ? (
+          <div className="p-8 text-center text-xs text-slate-400 bg-white rounded-2xl border border-slate-200">
+            Memuat data presensi...
+          </div>
+        ) : (records ?? []).length === 0 ? (
+          <div className="p-8 text-center text-xs text-slate-400 bg-white rounded-2xl border border-slate-200">
+            Tidak ada catatan absensi pada periode ini
+          </div>
+        ) : (
+          records?.map((r) => (
+            <div key={r.id} className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3">
+              <div className="flex items-start justify-between gap-2 border-b border-slate-100 pb-2.5">
+                <div>
+                  <p className="font-bold text-slate-900 text-xs">{r.employeeName}</p>
+                  <p className="text-[10px] text-slate-400">{r.employeeNo} • {formatDate(r.date)}</p>
+                </div>
+                <Badge variant={statusVariant(r.status)} className="capitalize text-[10px] px-2 py-0.5">
+                  {statusLabel(r.status)}
+                </Badge>
+              </div>
+
+              {/* Shift info badge */}
+              <div className="text-[11px] font-semibold text-slate-600 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200 flex items-center justify-between">
+                <span>{r.shiftName || "Shift Pagi"}</span>
+                <span className="font-mono text-slate-500">{r.shiftHours || "08:00 – 16:00"}</span>
+              </div>
+
+              {/* Check-in & Check-out Photos preview row */}
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <div className="bg-slate-50 p-2 rounded-xl border border-slate-100 space-y-1">
+                  <div className="text-[10px] font-bold text-blue-700 flex items-center gap-1">
+                    <LogIn className="w-3 h-3" /> Check-In: {formatTime(r.checkIn)}
+                  </div>
+                  {r.photoBase64 ? (
+                    <div className="flex items-center gap-1.5 cursor-pointer" onClick={() => setSelectedRecord(r)}>
+                      <img src={r.photoBase64} alt="Selfie In" className="w-8 h-8 rounded-lg object-cover ring-1 ring-blue-500/30 shrink-0" />
+                      <span className="text-[9px] text-slate-600 line-clamp-2 leading-tight">
+                        {r.locationAddress || "GPS Active"}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-[10px] text-slate-400 italic">Manual / -</span>
+                  )}
+                </div>
+
+                <div className="bg-slate-50 p-2 rounded-xl border border-slate-100 space-y-1">
+                  <div className="text-[10px] font-bold text-amber-700 flex items-center gap-1">
+                    <LogOut className="w-3 h-3" /> Check-Out: {formatTime(r.checkOut)}
+                  </div>
+                  {r.outPhotoBase64 ? (
+                    <div className="flex items-center gap-1.5 cursor-pointer" onClick={() => setSelectedRecord(r)}>
+                      <img src={r.outPhotoBase64} alt="Selfie Out" className="w-8 h-8 rounded-lg object-cover ring-1 ring-amber-500/30 shrink-0" />
+                      <span className="text-[9px] text-slate-600 line-clamp-2 leading-tight">
+                        {r.outLocationAddress || "GPS Active"}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-[10px] text-slate-400 italic">Belum Out</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Late warning if late */}
+              {r.status === "late" && r.lateDurationStr && (
+                <div className="text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-lg flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3 shrink-0" /> {r.lateDurationStr}
+                </div>
+              )}
+
+              <Button variant="outline" size="sm" className="w-full h-8 text-xs text-blue-600 rounded-xl" onClick={() => setSelectedRecord(r)}>
+                <Eye className="w-3.5 h-3.5 mr-1" /> Lihat Detail Foto & Lokasi GPS
+              </Button>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* DESKTOP TABLE VIEW (Shown on medium and large screens) */}
+      <Card className="hidden sm:block border-slate-200 shadow-xs overflow-hidden">
         <CardHeader className="pb-3 border-b border-slate-100 flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-base font-bold text-slate-900">
@@ -456,7 +545,7 @@ export default function Attendance() {
                     {/* Shift Info */}
                     <TableCell>
                       <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700 font-semibold text-[11px]">
-                        {r.shiftName || "Shift Pagi"} ({r.shiftHours || "07:00 – 15:00"})
+                        {r.shiftName || "Shift Pagi"} ({r.shiftHours || "08:00 – 16:00"})
                       </Badge>
                     </TableCell>
                     
@@ -552,11 +641,11 @@ export default function Attendance() {
       {/* Hidden Canvas for Canvas Snapshot */}
       <canvas ref={canvasRef} className="hidden" />
 
-      {/* Camera & GPS Attendance Modal */}
+      {/* Camera & GPS Attendance Modal (Mobile Optimized) */}
       <Dialog open={cameraModalOpen} onOpenChange={(open) => { if (!open) closeCameraModal(); }}>
-        <DialogContent className="max-w-md rounded-2xl p-6">
+        <DialogContent className="max-w-md w-[95%] rounded-2xl p-4 sm:p-6 max-h-[95vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg font-extrabold text-slate-900">
+            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg font-extrabold text-slate-900">
               <Camera className="w-5 h-5 text-blue-600" />
               Absen {attendanceType === "checkIn" ? "Masuk (Check-In)" : "Keluar (Check-Out)"}
             </DialogTitle>
@@ -570,7 +659,7 @@ export default function Attendance() {
                 <Label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-blue-600" /> Pilih Shift Kerja Hari Ini:
                 </Label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                   {SHIFT_OPTIONS.map((s) => {
                     const IconComp = s.icon;
                     const selected = selectedShift === s.id;
@@ -579,15 +668,15 @@ export default function Attendance() {
                         key={s.id}
                         type="button"
                         onClick={() => setSelectedShift(s.id as ShiftOption)}
-                        className={`p-2.5 rounded-xl border text-left transition-all ${
+                        className={`p-2 rounded-xl border text-left transition-all ${
                           selected 
                             ? "bg-blue-50 border-blue-600 ring-2 ring-blue-500/20 text-blue-900 font-bold" 
                             : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700"
                         }`}
                       >
-                        <IconComp className={`w-4 h-4 mb-1 ${selected ? "text-blue-600" : "text-slate-400"}`} />
-                        <div className="text-xs leading-none font-bold">{s.label}</div>
-                        <div className="text-[10px] text-slate-400 mt-1 font-mono">{s.hours}</div>
+                        <IconComp className={`w-3.5 h-3.5 mb-1 ${selected ? "text-blue-600" : "text-slate-400"}`} />
+                        <div className="text-[11px] sm:text-xs leading-none font-bold">{s.label}</div>
+                        <div className="text-[9px] sm:text-[10px] text-slate-400 mt-1 font-mono">{s.hours}</div>
                       </button>
                     );
                   })}
@@ -614,7 +703,7 @@ export default function Attendance() {
               )}
 
               {/* Camera Status Overlay Badge */}
-              <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-slate-700">
+              <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[10px] sm:text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-slate-700">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span>{capturedPhoto ? "Foto Terambil" : "Kamera Live Aktif"}</span>
               </div>
@@ -649,7 +738,7 @@ export default function Attendance() {
               ) : gpsError ? (
                 <p className="text-xs text-rose-600 font-medium">{gpsError}</p>
               ) : (
-                <p className="text-xs text-slate-400 italic">Mengambil alamat lokasi GPS dari perangkat Anda...</p>
+                <p className="text-xs text-slate-400 italic">Mengambil alamat lokasi GPS dari HP Anda...</p>
               )}
             </div>
 
@@ -657,7 +746,7 @@ export default function Attendance() {
             {!capturedPhoto ? (
               <Button 
                 onClick={takeSnapshot} 
-                className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md"
+                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md text-sm"
               >
                 <Camera className="w-4 h-4 mr-2" /> Ambil Foto Selfie & Lokasi GPS
               </Button>
@@ -666,16 +755,16 @@ export default function Attendance() {
                 <Button 
                   variant="outline" 
                   onClick={retakeSnapshot} 
-                  className="flex-1 rounded-xl border-slate-200"
+                  className="flex-1 rounded-xl border-slate-200 h-11 text-xs"
                 >
-                  <RefreshCw className="w-4 h-4 mr-2" /> Foto Ulang
+                  <RefreshCw className="w-4 h-4 mr-1.5" /> Foto Ulang
                 </Button>
                 <Button 
                   onClick={submitAttendance} 
                   disabled={checkIn.isPending || checkOut.isPending}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md h-11 text-xs"
                 >
-                  <CheckCircle2 className="w-4 h-4 mr-2" /> Submit Absen
+                  <CheckCircle2 className="w-4 h-4 mr-1.5" /> Submit Absen
                 </Button>
               </div>
             )}
@@ -687,15 +776,15 @@ export default function Attendance() {
       {/* Record Detail Modal */}
       {selectedRecord && (
         <Dialog open={!!selectedRecord} onOpenChange={() => setSelectedRecord(null)}>
-          <DialogContent className="max-w-xl rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-xl w-[95%] rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-lg font-bold text-slate-900">Detail Lengkap Presensi Karyawan</DialogTitle>
+              <DialogTitle className="text-base sm:text-lg font-bold text-slate-900">Detail Lengkap Presensi Karyawan</DialogTitle>
             </DialogHeader>
 
             <div className="space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div>
-                  <p className="font-bold text-slate-900 text-base">{selectedRecord.employeeName}</p>
+                  <p className="font-bold text-slate-900 text-sm sm:text-base">{selectedRecord.employeeName}</p>
                   <p className="text-xs text-slate-500">{selectedRecord.employeeNo} • {formatDate(selectedRecord.date)}</p>
                 </div>
                 <div className="text-right space-y-1">
@@ -716,7 +805,7 @@ export default function Attendance() {
                   Shift Kerja: {selectedRecord.shiftName || "Shift Pagi"}
                 </span>
                 <span className="font-mono text-blue-700 font-bold">
-                  Jam Kerja: {selectedRecord.shiftHours || "07:00 – 15:00"}
+                  Jam Kerja: {selectedRecord.shiftHours || "08:00 – 16:00"}
                 </span>
               </div>
 
@@ -819,7 +908,7 @@ export default function Attendance() {
 
       {/* Manual Mark Dialog for Managers */}
       <Dialog open={markDialog} onOpenChange={setMarkDialog}>
-        <DialogContent className="rounded-2xl">
+        <DialogContent className="rounded-2xl w-[95%] max-w-md">
           <DialogHeader>
             <DialogTitle>Catat Absensi Manual</DialogTitle>
           </DialogHeader>
