@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { eq, and, gte, lte, desc, count } from "drizzle-orm";
+import { eq, and, gte, lte, desc, count, isNull } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { createRouter } from "../middleware.js";
 import { authedQuery, managerQuery } from "../auth.js";
@@ -20,25 +20,43 @@ export const SHIFT_CONFIG: Record<ShiftType, { name: string; hours: string; star
 
 export function calculateLateDuration(now: Date, shift: ShiftType) {
   const cfg = SHIFT_CONFIG[shift] || SHIFT_CONFIG.pagi;
-  const target = new Date(now);
-  target.setHours(cfg.startHour, cfg.startMin, 0, 0);
 
-  // For night shift if checking in past midnight
-  if (shift === "malam" && now.getHours() < 12) {
-    target.setDate(target.getDate() - 1);
+  // Extract local hours and minutes from now Date
+  const nowHours = now.getHours();
+  const nowMinutes = now.getMinutes();
+
+  // Convert now time to total minutes from midnight
+  const nowTotalMins = nowHours * 60 + nowMinutes;
+
+  // Shift start total minutes from midnight
+  const shiftStartMins = cfg.startHour * 60 + cfg.startMin;
+  const graceLimitMins = shiftStartMins + cfg.graceMin;
+
+  let isLate = false;
+  let diffMinutes = 0;
+
+  if (shift === "malam") {
+    // Night Shift (00:00 - 08:00, grace 00:15)
+    if (nowTotalMins > graceLimitMins && nowTotalMins < 12 * 60) {
+      isLate = true;
+      diffMinutes = nowTotalMins - shiftStartMins;
+    }
+  } else {
+    // Pagi (08:00 - 16:00, grace 08:15) or Siang (16:00 - 00:00, grace 16:15)
+    if (nowTotalMins > graceLimitMins) {
+      isLate = true;
+      diffMinutes = nowTotalMins - shiftStartMins;
+    }
   }
-
-  const diffMs = now.getTime() - target.getTime();
-  const diffMinutes = Math.floor(diffMs / (1000 * 60));
-
-  const isLate = diffMinutes > cfg.graceMin;
 
   let lateDurationStr = "";
   if (isLate) {
     const hours = Math.floor(diffMinutes / 60);
     const mins = diffMinutes % 60;
-    if (hours > 0) {
+    if (hours > 0 && mins > 0) {
       lateDurationStr = `Terlambat ${hours} Jam ${mins} Menit`;
+    } else if (hours > 0) {
+      lateDurationStr = `Terlambat ${hours} Jam`;
     } else {
       lateDurationStr = `Terlambat ${mins} Menit`;
     }
@@ -204,8 +222,8 @@ export const attendanceRouter = createRouter({
       let selectedShift: ShiftType = input?.shift || "pagi";
       if (!input?.shift) {
         const hour = now.getHours();
-        if (hour >= 5 && hour < 13) selectedShift = "pagi";
-        else if (hour >= 13 && hour < 21) selectedShift = "siang";
+        if (hour >= 6 && hour < 14) selectedShift = "pagi";
+        else if (hour >= 14 && hour < 22) selectedShift = "siang";
         else selectedShift = "malam";
       }
 
@@ -213,16 +231,24 @@ export const attendanceRouter = createRouter({
       const lateCalc = calculateLateDuration(now, selectedShift);
       const status = lateCalc.isLate ? "late" : "present";
 
-      const [existing] = await db
+      // Look for an existing UNFINISHED record for today (where checkOut IS NULL)
+      const [unfinishedRecord] = await db
         .select()
         .from(attendanceRecords)
-        .where(and(eq(attendanceRecords.employeeId, employeeId), eq(attendanceRecords.date, today)))
+        .where(
+          and(
+            eq(attendanceRecords.employeeId, employeeId),
+            eq(attendanceRecords.date, today),
+            isNull(attendanceRecords.checkOut)
+          )
+        )
+        .orderBy(desc(attendanceRecords.id))
         .limit(1);
 
       let existingMeta: any = {};
-      if (existing?.notes) {
+      if (unfinishedRecord?.notes) {
         try {
-          if (existing.notes.startsWith("{")) existingMeta = JSON.parse(existing.notes);
+          if (unfinishedRecord.notes.startsWith("{")) existingMeta = JSON.parse(unfinishedRecord.notes);
         } catch (e) {}
       }
 
@@ -242,12 +268,15 @@ export const attendanceRouter = createRouter({
 
       const notesPayload = JSON.stringify(meta);
 
-      if (existing) {
+      if (unfinishedRecord) {
+        // Update current unfinished check-in session
         await db
           .update(attendanceRecords)
           .set({ checkIn: now, status, notes: notesPayload })
-          .where(eq(attendanceRecords.id, existing.id));
+          .where(eq(attendanceRecords.id, unfinishedRecord.id));
       } else {
+        // If employee has ALREADY checked out earlier or this is first check-in:
+        // CREATE A NEW RECORD so previous completed session is preserved!
         await db.insert(attendanceRecords).values({
           employeeId,
           date: today,
@@ -282,16 +311,38 @@ export const attendanceRouter = createRouter({
       const today = todayStr();
       const now = new Date();
 
-      const [existing] = await db
+      // Find the latest active check-in record for today (where checkOut IS NULL)
+      const [unfinishedRecord] = await db
         .select()
         .from(attendanceRecords)
-        .where(and(eq(attendanceRecords.employeeId, employeeId), eq(attendanceRecords.date, today)))
+        .where(
+          and(
+            eq(attendanceRecords.employeeId, employeeId),
+            eq(attendanceRecords.date, today),
+            isNull(attendanceRecords.checkOut)
+          )
+        )
+        .orderBy(desc(attendanceRecords.id))
         .limit(1);
 
+      // If no unfinished record exists, pick the latest record today
+      const targetRecord = unfinishedRecord || (
+        await db
+          .select()
+          .from(attendanceRecords)
+          .where(and(eq(attendanceRecords.employeeId, employeeId), eq(attendanceRecords.date, today)))
+          .orderBy(desc(attendanceRecords.id))
+          .limit(1)
+      )[0];
+
+      if (!targetRecord) {
+        throw new Error("Belum ada data check-in untuk hari ini. Silakan absen masuk terlebih dahulu.");
+      }
+
       let existingMeta: any = {};
-      if (existing?.notes) {
+      if (targetRecord.notes) {
         try {
-          if (existing.notes.startsWith("{")) existingMeta = JSON.parse(existing.notes);
+          if (targetRecord.notes.startsWith("{")) existingMeta = JSON.parse(targetRecord.notes);
         } catch (e) {}
       }
 
@@ -309,7 +360,8 @@ export const attendanceRouter = createRouter({
       await db
         .update(attendanceRecords)
         .set({ checkOut: now, notes: notesPayload })
-        .where(and(eq(attendanceRecords.employeeId, employeeId), eq(attendanceRecords.date, today)));
+        .where(eq(attendanceRecords.id, targetRecord.id));
+
       return { ok: true };
     }),
 
