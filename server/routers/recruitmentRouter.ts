@@ -36,6 +36,10 @@ export const recruitmentRouter = createRouter({
         fullName: z.string().min(1),
         email: z.string().email(),
         phone: z.string().optional(),
+        currentCompany: z.string().optional(),
+        portfolioUrl: z.string().optional(),
+        expectedSalary: z.string().optional(),
+        coverLetter: z.string().optional(),
         cvText: z.string().min(10),
         cvFileBase64: z.string().optional(),
       })
@@ -46,12 +50,24 @@ export const recruitmentRouter = createRouter({
       if (!job || job.status !== "open") {
         throw new TRPCError({ code: "BAD_REQUEST", message: "Lowongan tidak tersedia" });
       }
+
+      let enrichedCvText = input.cvText;
+      const extraInfo: string[] = [];
+      if (input.currentCompany) extraInfo.push(`Perusahaan / Posisi Terakhir: ${input.currentCompany}`);
+      if (input.portfolioUrl) extraInfo.push(`Portofolio / LinkedIn / GitHub: ${input.portfolioUrl}`);
+      if (input.expectedSalary) extraInfo.push(`Ekspektasi Gaji: Rp ${Number(input.expectedSalary).toLocaleString("id-ID")}`);
+      if (input.coverLetter) extraInfo.push(`Surat Lamaran / Catatan: ${input.coverLetter}`);
+
+      if (extraInfo.length > 0) {
+        enrichedCvText = `[INFORMASI TAMBAHAN KANDIDAT]\n${extraInfo.join("\n")}\n\n[EKSTRAKSI ISI CV PDF]\n${input.cvText}`;
+      }
+
       await db.insert(candidates).values({
         jobId: input.jobId,
         fullName: input.fullName,
         email: input.email,
         phone: input.phone || null,
-        cvText: input.cvText,
+        cvText: enrichedCvText,
         cvFileBase64: input.cvFileBase64 || null,
         source: "Public Job Board",
       });
