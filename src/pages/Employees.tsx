@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, Sparkles, Pencil, Trash2, X, Users as UsersIcon } from "lucide-react";
+import { Plus, Search, Sparkles, Pencil, Trash2, X, Users as UsersIcon, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,6 +66,7 @@ type EmployeeForm = {
   baseSalary: string;
   skills: string;
   bio: string;
+  password: string;
 };
 
 const EMPTY_FORM: EmployeeForm = {
@@ -83,6 +84,7 @@ const EMPTY_FORM: EmployeeForm = {
   baseSalary: "",
   skills: "",
   bio: "",
+  password: "",
 };
 
 export default function Employees() {
@@ -170,6 +172,7 @@ export default function Employees() {
       baseSalary: String(emp.baseSalary),
       skills: emp.skills ?? "",
       bio: emp.bio ?? "",
+      password: "",
     });
     setDialogOpen(true);
   };
@@ -190,6 +193,7 @@ export default function Employees() {
       baseSalary: Number(form.baseSalary) || 0,
       skills: form.skills || undefined,
       bio: form.bio || undefined,
+      password: form.password || undefined,
     };
     if (editingId) update.mutate({ id: editingId, ...payload });
     else create.mutate(payload);
@@ -496,6 +500,27 @@ export default function Employees() {
             <div className="space-y-1.5 sm:col-span-2">
               <Label>Bio</Label>
               <Textarea value={form.bio} onChange={set("bio")} rows={2} />
+            </div>
+
+            <div className="space-y-1.5 sm:col-span-2 border-t border-slate-100 pt-3 mt-1">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                  <KeyRound className="w-4 h-4 text-blue-600" /> Password Akun Login Karyawan
+                </Label>
+                <span className="text-[11px] text-slate-400">
+                  {editingId ? "(Kosongkan jika tidak meriset password)" : "(Opsional / minimal 6 karakter)"}
+                </span>
+              </div>
+              <Input
+                type="password"
+                value={form.password}
+                onChange={set("password")}
+                placeholder={editingId ? "Masukkan password baru untuk meriset password login" : "Buat password akun login karyawan"}
+                className="rounded-xl text-xs"
+              />
+              <p className="text-[11px] text-slate-500">
+                Username login karyawan adalah No. Karyawan (contoh: <strong className="font-mono text-slate-800">{form.employeeNo || "KAR02"}</strong>).
+              </p>
             </div>
           </div>
           <DialogFooter>

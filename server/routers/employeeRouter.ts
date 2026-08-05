@@ -4,7 +4,8 @@ import { TRPCError } from "@trpc/server";
 import { createRouter } from "../middleware.js";
 import { authedQuery, managerQuery } from "../auth.js";
 import { getDb } from "../queries/connection.js";
-import { employees, departments, positions } from "../../db/schema.js";
+import { hashPassword } from "../auth.js";
+import { users, employees, departments, positions } from "../../db/schema.js";
 import { rerankDocuments } from "../services/rerank.js";
 
 const employeeInput = z.object({
@@ -23,6 +24,7 @@ const employeeInput = z.object({
   baseSalary: z.number().int().min(0),
   skills: z.string().optional(),
   bio: z.string().optional(),
+  password: z.string().min(6).optional().or(z.literal("")),
 });
 
 export const employeeRouter = createRouter({
@@ -91,29 +93,94 @@ export const employeeRouter = createRouter({
 
   create: managerQuery.input(employeeInput).mutation(async ({ input }) => {
     const db = getDb();
+    const { password, ...empData } = input;
     const [dup] = await db.select().from(employees).where(eq(employees.employeeNo, input.employeeNo)).limit(1);
     if (dup) throw new TRPCError({ code: "CONFLICT", message: "Nomor karyawan sudah dipakai" });
+    
     await db.insert(employees).values({
-      ...input,
-      birthDate: input.birthDate || null,
-      departmentId: input.departmentId ?? null,
-      positionId: input.positionId ?? null,
-      managerId: input.managerId ?? null,
-      phone: input.phone || null,
-      address: input.address || null,
-      skills: input.skills || null,
-      bio: input.bio || null,
+      ...empData,
+      birthDate: empData.birthDate || null,
+      departmentId: empData.departmentId ?? null,
+      positionId: empData.positionId ?? null,
+      managerId: empData.managerId ?? null,
+      phone: empData.phone || null,
+      address: empData.address || null,
+      skills: empData.skills || null,
+      bio: empData.bio || null,
     });
+
+    const [newEmp] = await db.select().from(employees).where(eq(employees.employeeNo, input.employeeNo)).limit(1);
+    const newEmpId = newEmp?.id;
+
+    // Automatically create linked user login account if password provided
+    if (password && password.trim().length >= 6 && newEmpId) {
+      const username = input.employeeNo.toLowerCase().trim();
+      const passwordHash = hashPassword(password.trim());
+
+      const [existingUser] = await db.select().from(users).where(eq(users.username, username)).limit(1);
+      if (existingUser) {
+        await db.update(users).set({
+          passwordHash,
+          fullName: input.fullName,
+          email: input.email,
+          employeeId: newEmpId,
+          isActive: true,
+        }).where(eq(users.id, existingUser.id));
+      } else {
+        await db.insert(users).values({
+          username,
+          passwordHash,
+          fullName: input.fullName,
+          email: input.email,
+          role: "employee",
+          employeeId: newEmpId,
+          isActive: true,
+        });
+      }
+    }
+
     return { ok: true };
   }),
 
   update: managerQuery
     .input(employeeInput.partial().extend({ id: z.number().int().positive() }))
     .mutation(async ({ input }) => {
-      const { id, ...data } = input;
+      const { id, password, ...data } = input;
       const clean: Record<string, unknown> = { ...data };
       if (data.birthDate !== undefined) clean.birthDate = data.birthDate || null;
-      await getDb().update(employees).set(clean).where(eq(employees.id, id));
+      
+      const db = getDb();
+      await db.update(employees).set(clean).where(eq(employees.id, id));
+
+      // Update password for linked user account if password provided
+      if (password && password.trim().length >= 6) {
+        const passwordHash = hashPassword(password.trim());
+        const [existingUser] = await db.select().from(users).where(eq(users.employeeId, id)).limit(1);
+        if (existingUser) {
+          await db.update(users).set({ passwordHash }).where(eq(users.id, existingUser.id));
+        } else {
+          // Find employee to get employeeNo & email
+          const [emp] = await db.select().from(employees).where(eq(employees.id, id)).limit(1);
+          if (emp) {
+            const username = emp.employeeNo.toLowerCase().trim();
+            const [usrByUsername] = await db.select().from(users).where(eq(users.username, username)).limit(1);
+            if (usrByUsername) {
+              await db.update(users).set({ passwordHash, employeeId: id }).where(eq(users.id, usrByUsername.id));
+            } else {
+              await db.insert(users).values({
+                username,
+                passwordHash,
+                fullName: emp.fullName,
+                email: emp.email,
+                role: "employee",
+                employeeId: id,
+                isActive: true,
+              });
+            }
+          }
+        }
+      }
+
       return { ok: true };
     }),
 
