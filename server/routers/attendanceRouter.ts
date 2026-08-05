@@ -33,7 +33,39 @@ export const attendanceRouter = createRouter({
         .orderBy(desc(attendanceRecords.date), desc(attendanceRecords.id))
         .limit(500);
 
-      return rows.map((r) => ({ ...r.record, employeeName: r.employeeName, employeeNo: r.employeeNo }));
+      return rows.map((r) => {
+        let photoBase64: string | null = null;
+        let latitude: number | null = null;
+        let longitude: number | null = null;
+        let locationAddress: string | null = null;
+        let notesText: string | null = r.record.notes;
+
+        if (r.record.notes) {
+          try {
+            if (r.record.notes.startsWith("{")) {
+              const meta = JSON.parse(r.record.notes);
+              photoBase64 = meta.photoBase64 || null;
+              latitude = meta.latitude ?? null;
+              longitude = meta.longitude ?? null;
+              locationAddress = meta.locationAddress || null;
+              notesText = meta.customNotes || null;
+            }
+          } catch (e) {
+            // Raw text notes
+          }
+        }
+
+        return {
+          ...r.record,
+          employeeName: r.employeeName,
+          employeeNo: r.employeeNo,
+          photoBase64,
+          latitude,
+          longitude,
+          locationAddress,
+          notesText,
+        };
+      });
     }),
 
   todaySummary: authedQuery.query(async () => {
@@ -52,7 +84,15 @@ export const attendanceRouter = createRouter({
   }),
 
   checkIn: authedQuery
-    .input(z.object({ employeeId: z.number().int().positive().optional() }).optional())
+    .input(
+      z.object({
+        employeeId: z.number().int().positive().optional(),
+        photoBase64: z.string().optional(),
+        latitude: z.number().optional(),
+        longitude: z.number().optional(),
+        locationAddress: z.string().optional(),
+      }).optional()
+    )
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
       const employeeId = input?.employeeId ?? ctx.user.employeeId;
@@ -60,15 +100,35 @@ export const attendanceRouter = createRouter({
       const today = todayStr();
       const now = new Date();
       const late = now.getHours() >= 9; // check-in after 09:00 counts as late
+
       const [existing] = await db
         .select()
         .from(attendanceRecords)
         .where(and(eq(attendanceRecords.employeeId, employeeId), eq(attendanceRecords.date, today)))
         .limit(1);
+
+      let existingMeta: any = {};
+      if (existing?.notes) {
+        try {
+          if (existing.notes.startsWith("{")) existingMeta = JSON.parse(existing.notes);
+        } catch (e) {}
+      }
+
+      const meta = {
+        ...existingMeta,
+        photoBase64: input?.photoBase64 || existingMeta.photoBase64 || null,
+        latitude: input?.latitude ?? existingMeta.latitude ?? null,
+        longitude: input?.longitude ?? existingMeta.longitude ?? null,
+        locationAddress: input?.locationAddress || existingMeta.locationAddress || (input?.latitude ? `GPS: ${input.latitude}, ${input.longitude}` : null),
+        checkInTime: now.toISOString(),
+      };
+
+      const notesPayload = JSON.stringify(meta);
+
       if (existing) {
         await db
           .update(attendanceRecords)
-          .set({ checkIn: now, status: late ? "late" : "present" })
+          .set({ checkIn: now, status: late ? "late" : "present", notes: notesPayload })
           .where(eq(attendanceRecords.id, existing.id));
       } else {
         await db.insert(attendanceRecords).values({
@@ -76,21 +136,56 @@ export const attendanceRouter = createRouter({
           date: today,
           checkIn: now,
           status: late ? "late" : "present",
+          notes: notesPayload,
         });
       }
       return { ok: true, status: late ? "late" : "present" };
     }),
 
   checkOut: authedQuery
-    .input(z.object({ employeeId: z.number().int().positive().optional() }).optional())
+    .input(
+      z.object({
+        employeeId: z.number().int().positive().optional(),
+        photoBase64: z.string().optional(),
+        latitude: z.number().optional(),
+        longitude: z.number().optional(),
+        locationAddress: z.string().optional(),
+      }).optional()
+    )
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
       const employeeId = input?.employeeId ?? ctx.user.employeeId;
       if (!employeeId) throw new Error("Akun tidak terhubung dengan data karyawan");
       const today = todayStr();
+      const now = new Date();
+
+      const [existing] = await db
+        .select()
+        .from(attendanceRecords)
+        .where(and(eq(attendanceRecords.employeeId, employeeId), eq(attendanceRecords.date, today)))
+        .limit(1);
+
+      let existingMeta: any = {};
+      if (existing?.notes) {
+        try {
+          if (existing.notes.startsWith("{")) existingMeta = JSON.parse(existing.notes);
+        } catch (e) {}
+      }
+
+      const meta = {
+        ...existingMeta,
+        outPhotoBase64: input?.photoBase64 || existingMeta.outPhotoBase64 || null,
+        outLatitude: input?.latitude ?? existingMeta.outLatitude ?? null,
+        outLongitude: input?.longitude ?? existingMeta.outLongitude ?? null,
+        outLocationAddress: input?.locationAddress || existingMeta.outLocationAddress || (input?.latitude ? `GPS: ${input.latitude}, ${input.longitude}` : null),
+        checkOutTime: now.toISOString(),
+      };
+
+      const notesPayload = JSON.stringify(meta);
+
       await db
         .update(attendanceRecords)
-        .set({ checkOut: new Date() })
+        .set({ checkOut: now, notes: notesPayload })
         .where(and(eq(attendanceRecords.employeeId, employeeId), eq(attendanceRecords.date, today)));
       return { ok: true };
     }),
