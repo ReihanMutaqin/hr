@@ -38,6 +38,12 @@ export const attendanceRouter = createRouter({
         let latitude: number | null = null;
         let longitude: number | null = null;
         let locationAddress: string | null = null;
+
+        let outPhotoBase64: string | null = null;
+        let outLatitude: number | null = null;
+        let outLongitude: number | null = null;
+        let outLocationAddress: string | null = null;
+
         let notesText: string | null = r.record.notes;
 
         if (r.record.notes) {
@@ -48,6 +54,12 @@ export const attendanceRouter = createRouter({
               latitude = meta.latitude ?? null;
               longitude = meta.longitude ?? null;
               locationAddress = meta.locationAddress || null;
+
+              outPhotoBase64 = meta.outPhotoBase64 || null;
+              outLatitude = meta.outLatitude ?? null;
+              outLongitude = meta.outLongitude ?? null;
+              outLocationAddress = meta.outLocationAddress || null;
+
               notesText = meta.customNotes || null;
             }
           } catch (e) {
@@ -63,6 +75,10 @@ export const attendanceRouter = createRouter({
           latitude,
           longitude,
           locationAddress,
+          outPhotoBase64,
+          outLatitude,
+          outLongitude,
+          outLocationAddress,
           notesText,
         };
       });

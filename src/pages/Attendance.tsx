@@ -14,7 +14,8 @@ import {
   AlertCircle, 
   ExternalLink,
   Eye,
-  Navigation
+  Navigation,
+  Check
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -103,7 +104,7 @@ export default function Attendance() {
 
   const checkIn = trpc.attendance.checkIn.useMutation({
     onSuccess: (r) => {
-      toast.success(r.status === "late" ? "Check-in dicatat (terlambat) dengan Foto & GPS" : "Check-in berhasil dengan Foto & GPS");
+      toast.success(r.status === "late" ? "Check-in dicatat (terlambat) dengan Foto & GPS Alamat" : "Check-in berhasil dengan Foto & GPS Alamat");
       closeCameraModal();
       invalidate();
     },
@@ -112,7 +113,7 @@ export default function Attendance() {
 
   const checkOut = trpc.attendance.checkOut.useMutation({
     onSuccess: () => { 
-      toast.success("Check-out berhasil dicatat dengan Foto & GPS"); 
+      toast.success("Check-out berhasil dicatat dengan Foto & GPS Alamat"); 
       closeCameraModal();
       invalidate(); 
     },
@@ -124,7 +125,7 @@ export default function Attendance() {
     onError: (e) => toast.error(e.message),
   });
 
-  // Start Camera and fetch GPS Location
+  // Start Camera and fetch GPS Location with Full Reverse Geocoding Address
   const startCameraAndGps = (type: "checkIn" | "checkOut") => {
     setAttendanceType(type);
     setCapturedPhoto(null);
@@ -132,28 +133,49 @@ export default function Attendance() {
     setGpsLoading(true);
     setCameraModalOpen(true);
 
-    // 1. Fetch GPS Location
+    // 1. Fetch GPS Geolocation Coordinates
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        async (position) => {
           const lat = position.coords.latitude;
           const lng = position.coords.longitude;
+          
           setGpsLocation({
             lat,
             lng,
-            address: `GPS: ${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+            address: `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`,
           });
-          setGpsLoading(false);
+
+          // 2. Fetch Full Human Readable Address via OpenStreetMap Nominatim Reverse Geocoding
+          try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`, {
+              headers: { "Accept-Language": "id-ID,id;q=0.9" }
+            });
+            if (res.ok) {
+              const geoData = await res.json();
+              if (geoData && geoData.display_name) {
+                setGpsLocation({
+                  lat,
+                  lng,
+                  address: geoData.display_name,
+                });
+              }
+            }
+          } catch (err) {
+            console.warn("Reverse geocoding error:", err);
+          } finally {
+            setGpsLoading(false);
+          }
         },
         (error) => {
           console.warn("Geolocation error:", error);
-          setGpsError("GPS tidak dapat diakses. Pastikan izin lokasi aktif.");
+          setGpsError("GPS tidak dapat diakses. Pastikan izin lokasi aktif pada perangkat.");
           setGpsLoading(false);
         },
         { enableHighAccuracy: true, timeout: 10000 }
       );
     } else {
-      setGpsError("Browser tidak mendukung geolokasi GPS.");
+      setGpsError("Browser Anda tidak mendukung lokasi GPS.");
       setGpsLoading(false);
     }
   };
@@ -174,7 +196,7 @@ export default function Attendance() {
         })
         .catch((err) => {
           console.error("Camera access error:", err);
-          toast.error("Kamera tidak dapat diakses. Izinkan akses kamera pada browser.");
+          toast.error("Kamera tidak dapat diakses. Izinkan akses kamera pada browser Anda.");
         });
     }
 
@@ -231,7 +253,7 @@ export default function Attendance() {
       photoBase64: capturedPhoto,
       latitude: gpsLocation?.lat,
       longitude: gpsLocation?.lng,
-      locationAddress: gpsLocation?.address || (gpsLocation?.lat ? `GPS: ${gpsLocation.lat}, ${gpsLocation.lng}` : undefined),
+      locationAddress: gpsLocation?.address || (gpsLocation?.lat ? `Lat: ${gpsLocation.lat}, Lng: ${gpsLocation.lng}` : undefined),
     };
 
     if (attendanceType === "checkIn") {
@@ -251,7 +273,7 @@ export default function Attendance() {
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Presensi & Absensi Karyawan</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Absensi kehadiran kerja karyawan berbasis <span className="font-semibold text-slate-700">Foto Selfie Camera & Lokasi GPS</span>
+            Absensi kehadiran kerja karyawan berbasis <span className="font-semibold text-slate-700">Foto Kamera Selfie & Alamat Lokasi GPS Lengkap</span>
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -266,14 +288,14 @@ export default function Attendance() {
                 onClick={() => startCameraAndGps("checkIn")} 
                 className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-md shadow-blue-600/20"
               >
-                <Camera className="mr-2 h-4 w-4" /> Absen Check-In (Kamera & GPS)
+                <Camera className="mr-2 h-4 w-4" /> Absen Masuk (Foto & GPS)
               </Button>
               <Button 
                 variant="secondary" 
                 onClick={() => startCameraAndGps("checkOut")} 
                 className="bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold border border-slate-200"
               >
-                <LogOut className="mr-2 h-4 w-4 text-amber-600" /> Check-Out
+                <LogOut className="mr-2 h-4 w-4 text-amber-600" /> Absen Keluar (Foto & GPS)
               </Button>
             </>
           )}
@@ -370,7 +392,8 @@ export default function Attendance() {
               <TableRow>
                 <TableHead className="text-xs font-bold text-slate-700">Tanggal</TableHead>
                 <TableHead className="text-xs font-bold text-slate-700">Karyawan</TableHead>
-                <TableHead className="text-xs font-bold text-slate-700">Foto & GPS</TableHead>
+                <TableHead className="text-xs font-bold text-slate-700">Foto & GPS Masuk</TableHead>
+                <TableHead className="text-xs font-bold text-slate-700">Foto & GPS Keluar</TableHead>
                 <TableHead className="text-xs font-bold text-slate-700">Jam Masuk</TableHead>
                 <TableHead className="text-xs font-bold text-slate-700">Jam Keluar</TableHead>
                 <TableHead className="text-xs font-bold text-slate-700">Status</TableHead>
@@ -380,7 +403,7 @@ export default function Attendance() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-8 text-center text-sm text-slate-400 font-medium">
+                  <TableCell colSpan={8} className="py-8 text-center text-sm text-slate-400 font-medium">
                     Memuat data absensi...
                   </TableCell>
                 </TableRow>
@@ -393,7 +416,7 @@ export default function Attendance() {
                       <p className="text-[11px] text-slate-400">{r.employeeNo}</p>
                     </TableCell>
                     
-                    {/* Foto Selfie & GPS Thumbnail */}
+                    {/* Foto Selfie & GPS Masuk */}
                     <TableCell>
                       {r.photoBase64 ? (
                         <div 
@@ -402,17 +425,44 @@ export default function Attendance() {
                         >
                           <img 
                             src={r.photoBase64} 
-                            alt="Selfie" 
-                            className="w-9 h-9 rounded-lg object-cover ring-2 ring-blue-500/30 group-hover:scale-105 transition-transform" 
+                            alt="Selfie Masuk" 
+                            className="w-9 h-9 rounded-lg object-cover ring-2 ring-blue-500/30 group-hover:scale-105 transition-transform shrink-0" 
                           />
-                          <div className="min-w-0">
-                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
-                              <MapPin className="w-2.5 h-2.5" /> GPS Verified
+                          <div className="min-w-0 max-w-[150px]">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded truncate max-w-full">
+                              <MapPin className="w-2.5 h-2.5 shrink-0" />
+                              <span className="truncate">{r.locationAddress || "GPS Verified"}</span>
                             </span>
                           </div>
                         </div>
                       ) : (
+                        <span className="text-xs text-slate-400 italic">Manual / -</span>
+                      )}
+                    </TableCell>
+
+                    {/* Foto Selfie & GPS Keluar */}
+                    <TableCell>
+                      {r.outPhotoBase64 ? (
+                        <div 
+                          className="flex items-center gap-2 cursor-pointer group"
+                          onClick={() => setSelectedRecord(r)}
+                        >
+                          <img 
+                            src={r.outPhotoBase64} 
+                            alt="Selfie Keluar" 
+                            className="w-9 h-9 rounded-lg object-cover ring-2 ring-amber-500/30 group-hover:scale-105 transition-transform shrink-0" 
+                          />
+                          <div className="min-w-0 max-w-[150px]">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded truncate max-w-full">
+                              <MapPin className="w-2.5 h-2.5 shrink-0" />
+                              <span className="truncate">{r.outLocationAddress || "GPS Verified"}</span>
+                            </span>
+                          </div>
+                        </div>
+                      ) : r.checkOut ? (
                         <span className="text-xs text-slate-400 italic">Manual HR</span>
+                      ) : (
+                        <span className="text-xs text-slate-300 italic">Belum Check-Out</span>
                       )}
                     </TableCell>
 
@@ -425,7 +475,7 @@ export default function Attendance() {
                     </TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="sm" className="h-8 text-xs text-blue-600 hover:text-blue-700" onClick={() => setSelectedRecord(r)}>
-                        <Eye className="w-3.5 h-3.5 mr-1" /> Lihat
+                        <Eye className="w-3.5 h-3.5 mr-1" /> Detail
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -433,7 +483,7 @@ export default function Attendance() {
               )}
               {!isLoading && (records ?? []).length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-8 text-center text-xs text-slate-400 font-medium">
+                  <TableCell colSpan={8} className="py-8 text-center text-xs text-slate-400 font-medium">
                     Tidak ada catatan absensi pada rentang periode ini
                   </TableCell>
                 </TableRow>
@@ -484,28 +534,35 @@ export default function Attendance() {
             </div>
 
             {/* GPS Location Status Bar */}
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1">
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1.5">
               <div className="flex items-center justify-between text-xs font-semibold text-slate-800">
                 <span className="flex items-center gap-1.5">
-                  <Navigation className="w-3.5 h-3.5 text-blue-600" /> Lokasi GPS Terdeteksi
+                  <Navigation className="w-3.5 h-3.5 text-blue-600" /> Alamat Lokasi GPS
                 </span>
                 {gpsLoading ? (
-                  <span className="text-[10px] text-amber-600 animate-pulse">Mencari Koordinat...</span>
+                  <span className="text-[10px] text-amber-600 animate-pulse">Melacak Alamat Lengkap...</span>
                 ) : gpsLocation ? (
-                  <span className="text-[10px] text-emerald-600 font-bold">Terverifikasi</span>
+                  <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                    <Check className="w-3 h-3" /> Terverifikasi
+                  </span>
                 ) : (
                   <span className="text-[10px] text-rose-500 font-bold">Gagal</span>
                 )}
               </div>
 
               {gpsLocation ? (
-                <p className="text-xs font-mono text-slate-600">
-                  Lat: {gpsLocation.lat.toFixed(5)}, Lng: {gpsLocation.lng.toFixed(5)}
-                </p>
+                <div className="space-y-1">
+                  <p className="text-xs text-slate-800 font-medium leading-relaxed bg-white p-2 rounded-lg border border-slate-200">
+                    {gpsLocation.address || `Lat: ${gpsLocation.lat.toFixed(5)}, Lng: ${gpsLocation.lng.toFixed(5)}`}
+                  </p>
+                  <p className="text-[10px] font-mono text-slate-400">
+                    Koordinat Presisi: {gpsLocation.lat.toFixed(6)}, {gpsLocation.lng.toFixed(6)}
+                  </p>
+                </div>
               ) : gpsError ? (
                 <p className="text-xs text-rose-600 font-medium">{gpsError}</p>
               ) : (
-                <p className="text-xs text-slate-400 italic">Mengambil koordinat GPS dari perangkat Anda...</p>
+                <p className="text-xs text-slate-400 italic">Mengambil alamat lokasi GPS dari perangkat Anda...</p>
               )}
             </div>
 
@@ -515,7 +572,7 @@ export default function Attendance() {
                 onClick={takeSnapshot} 
                 className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md"
               >
-                <Camera className="w-4 h-4 mr-2" /> Ambil Foto Selfie & GPS
+                <Camera className="w-4 h-4 mr-2" /> Ambil Foto Selfie & Lokasi GPS
               </Button>
             ) : (
               <div className="flex gap-2">
@@ -543,15 +600,15 @@ export default function Attendance() {
       {/* Record Detail Modal */}
       {selectedRecord && (
         <Dialog open={!!selectedRecord} onOpenChange={() => setSelectedRecord(null)}>
-          <DialogContent className="max-w-md rounded-2xl p-6">
+          <DialogContent className="max-w-xl rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-lg font-bold text-slate-900">Detail Presensi Karyawan</DialogTitle>
+              <DialogTitle className="text-lg font-bold text-slate-900">Detail Lengkap Presensi Karyawan</DialogTitle>
             </DialogHeader>
 
             <div className="space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div>
-                  <p className="font-bold text-slate-900 text-sm">{selectedRecord.employeeName}</p>
+                  <p className="font-bold text-slate-900 text-base">{selectedRecord.employeeName}</p>
                   <p className="text-xs text-slate-500">{selectedRecord.employeeNo} • {formatDate(selectedRecord.date)}</p>
                 </div>
                 <Badge variant={statusVariant(selectedRecord.status)} className="capitalize text-xs">
@@ -559,53 +616,91 @@ export default function Attendance() {
                 </Badge>
               </div>
 
-              {/* Photo View */}
-              {selectedRecord.photoBase64 ? (
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-slate-700">Foto Selfie Check-In:</Label>
-                  <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-950 aspect-[4/3]">
-                    <img src={selectedRecord.photoBase64} alt="Selfie Record" className="w-full h-full object-cover" />
-                  </div>
-                </div>
-              ) : (
-                <p className="text-xs text-slate-400 italic">Tidak ada foto selfie tersimpan untuk record ini.</p>
-              )}
-
-              {/* GPS Location View */}
-              {selectedRecord.latitude && selectedRecord.longitude ? (
-                <div className="space-y-2 bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs">
+              {/* Grid 2 Columns: Check-In vs Check-Out */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                
+                {/* Check-In Card */}
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-slate-800 flex items-center gap-1.5">
-                      <MapPin className="w-4 h-4 text-blue-600" /> Koordinat GPS:
+                    <span className="text-xs font-bold text-blue-700 uppercase tracking-wider flex items-center gap-1">
+                      <LogIn className="w-3.5 h-3.5 text-blue-600" /> Presensi Masuk
                     </span>
-                    <a 
-                      href={`https://www.google.com/maps?q=${selectedRecord.latitude},${selectedRecord.longitude}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline flex items-center gap-1 font-semibold"
-                    >
-                      Buka Peta <ExternalLink className="w-3 h-3" />
-                    </a>
+                    <span className="text-xs font-bold text-slate-800">{formatTime(selectedRecord.checkIn)}</span>
                   </div>
-                  <p className="font-mono text-slate-700">
-                    Lat: {selectedRecord.latitude}, Lng: {selectedRecord.longitude}
-                  </p>
-                  {selectedRecord.locationAddress && (
-                    <p className="text-slate-500">{selectedRecord.locationAddress}</p>
-                  )}
-                </div>
-              ) : null}
 
-              {/* Timestamps */}
-              <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-slate-100">
-                <div>
-                  <span className="text-slate-500">Jam Check-In:</span>
-                  <p className="font-bold text-slate-800">{formatTime(selectedRecord.checkIn)}</p>
+                  {selectedRecord.photoBase64 ? (
+                    <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-950 aspect-[4/3]">
+                      <img src={selectedRecord.photoBase64} alt="Selfie Masuk" className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="p-4 rounded-xl bg-white border border-slate-200 text-center text-xs text-slate-400 italic">
+                      Tidak ada foto check-in
+                    </div>
+                  )}
+
+                  {selectedRecord.latitude && selectedRecord.longitude ? (
+                    <div className="space-y-1.5 text-xs bg-white p-3 rounded-xl border border-slate-200">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-slate-800 flex items-center gap-1">
+                          <MapPin className="w-3.5 h-3.5 text-blue-600" /> Lokasi GPS:
+                        </span>
+                        <a 
+                          href={`https://www.google.com/maps?q=${selectedRecord.latitude},${selectedRecord.longitude}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline flex items-center gap-1 font-semibold text-[11px]"
+                        >
+                          Buka Peta <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                      <p className="text-slate-700 font-medium leading-relaxed">
+                        {selectedRecord.locationAddress || `Lat: ${selectedRecord.latitude}, Lng: ${selectedRecord.longitude}`}
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
-                <div>
-                  <span className="text-slate-500">Jam Check-Out:</span>
-                  <p className="font-bold text-slate-800">{formatTime(selectedRecord.checkOut)}</p>
+
+                {/* Check-Out Card */}
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1">
+                      <LogOut className="w-3.5 h-3.5 text-amber-600" /> Presensi Keluar
+                    </span>
+                    <span className="text-xs font-bold text-slate-800">{formatTime(selectedRecord.checkOut)}</span>
+                  </div>
+
+                  {selectedRecord.outPhotoBase64 ? (
+                    <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-950 aspect-[4/3]">
+                      <img src={selectedRecord.outPhotoBase64} alt="Selfie Keluar" className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="p-4 rounded-xl bg-white border border-slate-200 text-center text-xs text-slate-400 italic">
+                      {selectedRecord.checkOut ? "Absen keluar diinput HR" : "Belum melakukan absen keluar"}
+                    </div>
+                  )}
+
+                  {selectedRecord.outLatitude && selectedRecord.outLongitude ? (
+                    <div className="space-y-1.5 text-xs bg-white p-3 rounded-xl border border-slate-200">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-slate-800 flex items-center gap-1">
+                          <MapPin className="w-3.5 h-3.5 text-amber-600" /> Lokasi GPS:
+                        </span>
+                        <a 
+                          href={`https://www.google.com/maps?q=${selectedRecord.outLatitude},${selectedRecord.outLongitude}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline flex items-center gap-1 font-semibold text-[11px]"
+                        >
+                          Buka Peta <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                      <p className="text-slate-700 font-medium leading-relaxed">
+                        {selectedRecord.outLocationAddress || `Lat: ${selectedRecord.outLatitude}, Lng: ${selectedRecord.outLongitude}`}
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
+
               </div>
             </div>
 
