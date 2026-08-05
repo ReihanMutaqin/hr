@@ -96,14 +96,14 @@ function SidebarBrand() {
   return (
     <div className="flex items-center gap-3 px-5 py-6 border-b border-slate-800/80 mb-2">
       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-blue-500 shadow-md shadow-blue-600/20 text-white font-black text-xl">
-        N
+        P
       </div>
       <div>
-        <div className="text-base font-extrabold text-white tracking-tight flex items-center gap-1.5">
-          Nexus<span className="text-blue-400">HR</span>
+        <div className="text-base font-extrabold text-white tracking-tight flex items-center gap-1">
+          Phoenix <span className="text-blue-400">System</span>
         </div>
         <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-          Enterprise HR Suite
+          Enterprise HR Platform
         </div>
       </div>
     </div>

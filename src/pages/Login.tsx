@@ -55,7 +55,7 @@ export default function Login() {
             <Building2 className="h-7 w-7" />
           </div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight">
-            Nexus<span className="text-blue-400">HR</span>
+            Phoenix <span className="text-blue-400">System</span>
           </h1>
           <p className="text-xs text-slate-400 font-medium">
             Platform Rekrutmen & Manajemen SDM Enterprise
@@ -149,7 +149,7 @@ export default function Login() {
         </Card>
 
         <p className="text-center text-[11px] text-slate-500">
-          © {new Date().getFullYear()} NexusHR. Built by RDir Studio.
+          © {new Date().getFullYear()} Phoenix System. Built by RDir Studio.
         </p>
 
       </div>

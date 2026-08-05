@@ -91,7 +91,7 @@ export default function CandidatePortal() {
 
   const handleShareWhatsApp = () => {
     if (!job) return;
-    const text = `Lowongan Pekerjaan: ${job.title} di ${job.departmentName || "NexusHR"}. Lihat detail di ${window.location.href}`;
+    const text = `Lowongan Pekerjaan: ${job.title} di ${job.departmentName || "Phoenix System"}. Lihat detail di ${window.location.href}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
@@ -202,7 +202,7 @@ export default function CandidatePortal() {
 
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Lamaran Berhasil Terkirim</h1>
           <p className="mt-2 text-slate-600 text-sm leading-relaxed">
-            Terima kasih telah melamar posisi <strong className="text-slate-900 font-semibold">{job.title}</strong> di NexusHR.
+            Terima kasih telah melamar posisi <strong className="text-slate-900 font-semibold">{job.title}</strong> di Phoenix System.
           </p>
 
           <div className="mt-6 bg-slate-50 border border-slate-200 rounded-xl p-5 text-left space-y-2.5">
@@ -259,10 +259,10 @@ export default function CandidatePortal() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-lg">
-              N
+              P
             </div>
             <div>
-              <span className="font-bold text-slate-900 tracking-tight text-lg">Nexus<span className="text-blue-600">HR</span></span>
+              <span className="font-bold text-slate-900 tracking-tight text-lg">Phoenix <span className="text-blue-600">System</span></span>
               <span className="hidden sm:inline-block ml-2.5 text-xs font-medium text-slate-500 border-l border-slate-200 pl-2.5">
                 Portal Karir Resmi
               </span>
@@ -774,7 +774,7 @@ export default function CandidatePortal() {
                 Bebas Biaya & Terjaga
               </div>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Seluruh proses rekrutmen di NexusHR <strong className="text-slate-700">100% bebas biaya</strong>. Data pribadi Anda dijaga secara aman.
+                Seluruh proses rekrutmen di Phoenix System <strong className="text-slate-700">100% bebas biaya</strong>. Data pribadi Anda dijaga secara aman.
               </p>
             </div>
 
@@ -787,10 +787,10 @@ export default function CandidatePortal() {
       <footer className="bg-white border-t border-slate-200 mt-12 py-6">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-800">NexusHR</span>
+            <span className="font-bold text-slate-800">Phoenix System</span>
             <span>• Portal Rekrutmen Resmi</span>
           </div>
-          <p>© {new Date().getFullYear()} NexusHR System. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Phoenix System. All rights reserved.</p>
         </div>
       </footer>
 
