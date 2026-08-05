@@ -9,7 +9,7 @@ import { aiLogs } from "../../db/schema.js";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/rerank";
 const OPENROUTER_CHAT_URL = "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_MODEL = "nvidia/llama-nemotron-rerank-vl-1b-v2:free";
+const DEFAULT_MODEL = "inclusionai/ling-3.0-flash:free";
 
 export type RerankResult = {
   index: number;

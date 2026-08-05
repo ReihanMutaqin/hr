@@ -4,7 +4,7 @@ dotenv.config();
 async function testRerank() {
   const OPENROUTER_URL = "https://openrouter.ai/api/v1/rerank";
   const apiKey = process.env.OPENROUTER_API_KEY;
-  const model = "nvidia/llama-nemotron-rerank-vl-1b-v2:free";
+  const model = process.env.OPENROUTER_RERANK_MODEL || "inclusionai/ling-3.0-flash:free";
 
   const res = await fetch(OPENROUTER_URL, {
     method: "POST",

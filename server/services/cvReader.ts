@@ -7,7 +7,7 @@ import { aiLogs } from "../../db/schema.js";
  */
 
 const OPENROUTER_CHAT_URL = "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_CHAT_MODEL = "tencent/hy3:free";
+const DEFAULT_CHAT_MODEL = "inclusionai/ling-3.0-flash:free";
 
 export type CVEvaluationResponse = {
   opinion: string;

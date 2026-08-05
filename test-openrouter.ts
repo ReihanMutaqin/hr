@@ -14,7 +14,7 @@ async function test() {
       "X-Title": "HR App",
     },
     body: JSON.stringify({
-      model: "google/gemma-4-31b-it:free",
+      model: process.env.OPENROUTER_CHAT_MODEL || "inclusionai/ling-3.0-flash:free",
       messages: [{ role: "user", content: "Test message. Reply 'OK' if you receive this." }],
     }),
   });
