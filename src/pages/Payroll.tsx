@@ -1,5 +1,20 @@
-import { useState } from "react";
-import { Wallet, Play, CheckCheck, Receipt, Banknote, Info } from "lucide-react";
+import { useState, useRef } from "react";
+import { 
+  Wallet, 
+  Play, 
+  CheckCheck, 
+  Receipt, 
+  Banknote, 
+  Info, 
+  Printer, 
+  FileText, 
+  Download, 
+  Building2, 
+  CheckCircle2,
+  Eye,
+  ShieldCheck,
+  Building
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,9 +42,30 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { trpc } from "@/providers/trpc";
 import { useAuth } from "@/hooks/useAuth";
-import { formatRupiah, formatDateTime, statusLabel, statusVariant } from "@/lib/format";
+import { formatRupiah, formatDateTime, formatDate, statusLabel, statusVariant } from "@/lib/format";
+
+function terbilang(n: number): string {
+  const angka = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+  n = Math.floor(Math.abs(n));
+  if (n < 12) return angka[n];
+  if (n < 20) return terbilang(n - 10) + " Belas";
+  if (n < 100) return terbilang(Math.floor(n / 10)) + " Puluh " + terbilang(n % 10);
+  if (n < 200) return "Seratus " + terbilang(n - 100);
+  if (n < 1000) return terbilang(Math.floor(n / 100)) + " Ratus " + terbilang(n % 100);
+  if (n < 2000) return "Seribu " + terbilang(n - 1000);
+  if (n < 1000000) return terbilang(Math.floor(n / 1000)) + " Ribu " + terbilang(n % 1000);
+  if (n < 1000000000) return terbilang(Math.floor(n / 1000000)) + " Juta " + terbilang(n % 1000000);
+  return formatRupiah(n);
+}
 
 export default function Payroll() {
   const { user } = useAuth();
@@ -38,6 +74,9 @@ export default function Payroll() {
   const currentPeriod = new Date().toISOString().slice(0, 7);
   const [period, setPeriod] = useState(currentPeriod);
   const [filterPeriod, setFilterPeriod] = useState("all");
+  
+  // Selected Payslip for Modal & PDF Download
+  const [selectedSlip, setSelectedSlip] = useState<any | null>(null);
 
   const { data: slips, isLoading } = trpc.payroll.list.useQuery(
     filterPeriod !== "all" ? { period: filterPeriod } : undefined,
@@ -68,6 +107,430 @@ export default function Payroll() {
     onSuccess: () => { toast.success("Semua slip periode ini dibayar"); invalidate(); },
     onError: (e) => toast.error(e.message),
   });
+
+  // Handle Professional PDF Download / Print Window
+  const handleDownloadPdf = (slip: any) => {
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      toast.error("Gagal membuka jendela cetak PDF. Izinkan izin pop-up browser Anda.");
+      return;
+    }
+
+    const todayStr = new Date().toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+
+    const periodStr = new Date(slip.period + "-01").toLocaleDateString("id-ID", {
+      month: "long",
+      year: "numeric",
+    });
+
+    const grossSalary = slip.baseSalary + slip.allowance + slip.overtime + slip.bonus;
+    const totalDeductions = slip.deduction + slip.tax;
+    const netSalary = slip.netSalary;
+    const terbilangText = terbilang(netSalary);
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="id">
+        <head>
+          <meta charset="UTF-8">
+          <title>Slip Gaji ${slip.employeeName} - ${periodStr}</title>
+          <style>
+            @page { size: A4; margin: 12mm 15mm; }
+            body {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              color: #0f172a;
+              margin: 0;
+              padding: 20px;
+              font-size: 11px;
+              line-height: 1.5;
+              background: #fff;
+            }
+            .payslip-container {
+              max-width: 800px;
+              margin: 0 auto;
+              border: 1px solid #cbd5e1;
+              border-radius: 12px;
+              padding: 28px;
+              box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            }
+            .header-kop {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              border-bottom: 2px solid #0b1329;
+              padding-bottom: 16px;
+              margin-bottom: 20px;
+            }
+            .brand-logo {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+            }
+            .brand-icon {
+              width: 42px;
+              height: 42px;
+              background: linear-gradient(135deg, #2563eb, #1d4ed8);
+              color: #ffffff;
+              border-radius: 10px;
+              font-size: 24px;
+              font-weight: 900;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+            }
+            .brand-title {
+              font-size: 20px;
+              font-weight: 800;
+              color: #0b1329;
+              letter-spacing: -0.5px;
+            }
+            .brand-address {
+              font-size: 10px;
+              color: #64748b;
+              margin-top: 2px;
+            }
+            .doc-info {
+              text-align: right;
+            }
+            .doc-info h2 {
+              margin: 0;
+              font-size: 18px;
+              font-weight: 800;
+              color: #2563eb;
+              letter-spacing: -0.5px;
+            }
+            .doc-info p {
+              margin: 2px 0 0 0;
+              font-size: 11px;
+              color: #475569;
+              font-weight: 600;
+            }
+            .badge-status {
+              display: inline-block;
+              margin-top: 6px;
+              padding: 3px 10px;
+              border-radius: 6px;
+              font-size: 10px;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+            .badge-paid { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+            .badge-draft { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+
+            .emp-grid {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 20px;
+              background: #f8fafc;
+              border: 1px solid #e2e8f0;
+              border-radius: 10px;
+              padding: 14px 18px;
+              margin-bottom: 20px;
+            }
+            .info-group {
+              display: flex;
+              flex-direction: column;
+              gap: 6px;
+            }
+            .info-row {
+              display: flex;
+              justify-content: space-between;
+              font-size: 11px;
+            }
+            .info-label { color: #64748b; font-weight: 500; }
+            .info-val { color: #0f172a; font-weight: 700; }
+
+            .section-title {
+              font-size: 12px;
+              font-weight: 800;
+              color: #0f172a;
+              margin-bottom: 10px;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+            .breakdown-table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 20px;
+            }
+            .breakdown-table th {
+              background: #0b1329;
+              color: #ffffff;
+              padding: 10px 14px;
+              font-size: 11px;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+            .breakdown-table th.right { text-align: right; }
+            .breakdown-table td {
+              padding: 9px 14px;
+              border-bottom: 1px solid #e2e8f0;
+              font-size: 11px;
+              color: #334155;
+            }
+            .breakdown-table td.right { text-align: right; font-weight: 600; }
+            .breakdown-table tr.total-row td {
+              background: #f1f5f9;
+              font-weight: 800;
+              color: #0f172a;
+              border-top: 1px solid #cbd5e1;
+              border-bottom: 2px solid #cbd5e1;
+            }
+
+            .net-banner {
+              background: linear-gradient(135deg, #059669, #047857);
+              color: #ffffff;
+              border-radius: 12px;
+              padding: 18px 24px;
+              margin-bottom: 24px;
+              box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+            }
+            .net-flex {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            }
+            .net-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; }
+            .net-amount { font-size: 24px; font-weight: 900; letter-spacing: -0.5px; }
+            .terbilang-box {
+              margin-top: 8px;
+              padding-top: 8px;
+              border-top: 1px solid rgba(255, 255, 255, 0.2);
+              font-size: 11px;
+              font-style: italic;
+              opacity: 0.95;
+            }
+
+            .signatures {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 40px;
+              margin-top: 36px;
+              padding-top: 16px;
+            }
+            .sig-box {
+              text-align: center;
+            }
+            .sig-title { font-size: 10px; font-weight: 600; color: #64748b; margin-bottom: 8px; }
+            .sig-space {
+              height: 55px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+            .stamp-badge {
+              border: 2px dashed #059669;
+              color: #059669;
+              padding: 4px 12px;
+              border-radius: 8px;
+              font-weight: 800;
+              font-size: 10px;
+              text-transform: uppercase;
+              transform: rotate(-3deg);
+            }
+            .sig-name { font-size: 12px; font-weight: 800; color: #0f172a; text-decoration: underline; }
+            .sig-role { font-size: 10px; color: #64748b; }
+
+            .footer-disclaimer {
+              margin-top: 36px;
+              border-top: 1px solid #e2e8f0;
+              padding-top: 12px;
+              font-size: 9px;
+              color: #94a3b8;
+              text-align: center;
+              line-height: 1.4;
+            }
+
+            @media print {
+              body { padding: 0; }
+              .payslip-container { border: none; box-shadow: none; padding: 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="payslip-container">
+            
+            <!-- Header KOP Perusahaan -->
+            <div class="header-kop">
+              <div class="brand-logo">
+                <div class="brand-icon">P</div>
+                <div>
+                  <div class="brand-title">Phoenix System</div>
+                  <div class="brand-address">PT PHOENIX SISTEM INDONESIA • Enterprise HR & Payroll Division</div>
+                  <div class="brand-address">Menara Phoenix Lt. 18, Jl. Jend. Sudirman Kav. 52-53, Jakarta Selatan 12190</div>
+                </div>
+              </div>
+              <div class="doc-info">
+                <h2>SLIP GAJI KARYAWAN</h2>
+                <p>PERIODE: ${periodStr.toUpperCase()}</p>
+                <div class="badge-status ${slip.status === 'paid' ? 'badge-paid' : 'badge-draft'}">
+                  ${slip.status === 'paid' ? 'LUNAS / DIBAYAR' : 'DRAFT PAYROLL'}
+                </div>
+              </div>
+            </div>
+
+            <!-- Grid Data Karyawan -->
+            <div class="emp-grid">
+              <div class="info-group">
+                <div class="info-row">
+                  <span class="info-label">Nama Karyawan:</span>
+                  <span class="info-val">${slip.employeeName}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">NIK Karyawan:</span>
+                  <span class="info-val">${slip.employeeNo}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Departemen:</span>
+                  <span class="info-val">Operational & HR</span>
+                </div>
+              </div>
+              <div class="info-group">
+                <div class="info-row">
+                  <span class="info-label">Metode Pembayaran:</span>
+                  <span class="info-val">Transfer Bank BCA</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Tanggal Ditransfer:</span>
+                  <span class="info-val">${slip.paidAt ? formatDate(slip.paidAt) : todayStr}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Status Hubungan:</span>
+                  <span class="info-val">Karyawan Tetap</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tabel Rincian Komponen Gaji -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              
+              <!-- Pendapatan -->
+              <div>
+                <div class="section-title" style="color: #1e40af;">I. PENERIMAAN (EARNINGS)</div>
+                <table class="breakdown-table">
+                  <thead>
+                    <tr>
+                      <th>Komponen</th>
+                      <th class="right">Jumlah (Rp)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Gaji Pokok</td>
+                      <td class="right">${formatRupiah(slip.baseSalary)}</td>
+                    </tr>
+                    <tr>
+                      <td>Tunjangan Jabatan (10%)</td>
+                      <td class="right">${formatRupiah(slip.allowance)}</td>
+                    </tr>
+                    <tr>
+                      <td>Uang Lembur & Bonus</td>
+                      <td class="right">${formatRupiah(slip.overtime + slip.bonus)}</td>
+                    </tr>
+                    <tr class="total-row">
+                      <td>Total Penerimaan Kotor</td>
+                      <td class="right">${formatRupiah(grossSalary)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Potongan -->
+              <div>
+                <div class="section-title" style="color: #991b1b;">II. PEMOTONGAN (DEDUCTIONS)</div>
+                <table class="breakdown-table">
+                  <thead>
+                    <tr>
+                      <th>Komponen</th>
+                      <th class="right">Jumlah (Rp)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Potongan Absensi (Prorata)</td>
+                      <td class="right" style="color: #dc2626;">-${formatRupiah(slip.deduction)}</td>
+                    </tr>
+                    <tr>
+                      <td>Pajak PPh 21 (5%)</td>
+                      <td class="right" style="color: #d97706;">-${formatRupiah(slip.tax)}</td>
+                    </tr>
+                    <tr>
+                      <td>&nbsp;</td>
+                      <td class="right">&nbsp;</td>
+                    </tr>
+                    <tr class="total-row">
+                      <td>Total Pemotongan</td>
+                      <td class="right" style="color: #dc2626;">-${formatRupiah(totalDeductions)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+
+            <!-- Banner Gaji Bersih -->
+            <div class="net-banner">
+              <div class="net-flex">
+                <div>
+                  <div class="net-label">TOTAL GAJI BERSIH DITERIMA (TAKE HOME PAY)</div>
+                  <div style="font-size: 10px; opacity: 0.9;">Gaji Kotor - Total Pemotongan</div>
+                </div>
+                <div class="net-amount">${formatRupiah(netSalary)}</div>
+              </div>
+              <div class="terbilang-box">
+                Terbilang: # ${terbilangText} Rupiah #
+              </div>
+            </div>
+
+            <!-- Pengesahan & Tanda Tangan -->
+            <div class="signatures">
+              <div class="sig-box">
+                <div class="sig-title">Penerima Gaji,</div>
+                <div class="sig-space"></div>
+                <div class="sig-name">${slip.employeeName}</div>
+                <div class="sig-role">NIK: ${slip.employeeNo}</div>
+              </div>
+              <div class="sig-box">
+                <div class="sig-title">Jakarta, ${todayStr}</div>
+                <div class="sig-title">Head of HR & Finance Department,</div>
+                <div class="sig-space">
+                  <div class="stamp-badge">VERIFIED & PAID • PHX</div>
+                </div>
+                <div class="sig-name">Financial Controller</div>
+                <div class="sig-role">PT Phoenix Sistem Indonesia</div>
+              </div>
+            </div>
+
+            <!-- Footer Disclaimer -->
+            <div class="footer-disclaimer">
+              Dokumen ini diterbitkan secara sah dan otomatis oleh sistem penggajian terpadu <strong>Phoenix System (PT Phoenix Sistem Indonesia)</strong>.<br>
+              Informasi yang tercantum di dalam slip gaji ini bersifat RAHASIA (CONFIDENTIAL) dan hanya diperuntukkan bagi pemilik akun yang bersangkutan.
+            </div>
+
+          </div>
+
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+              }, 300);
+            };
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.open();
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+  };
 
   return (
     <div className="space-y-5 w-full min-w-0 overflow-x-hidden">
@@ -218,57 +681,31 @@ export default function Payroll() {
                 </div>
 
                 <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-semibold text-rose-600">Potongan Absensi</span>
-                    {s.deduction > 0 && (
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <button className="text-rose-600 hover:underline text-[10px] font-bold flex items-center gap-0.5">
-                            Detail <Info className="h-2.5 w-2.5" />
-                          </button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-64 text-sm" side="top">
-                          <div className="space-y-2">
-                            <p className="font-semibold text-slate-900">Rincian Potongan</p>
-                            <div className="text-xs text-slate-600 space-y-1">
-                              <div className="flex justify-between"><span>Asumsi Hari Kerja:</span><span>22 Hari</span></div>
-                              <div className="flex justify-between"><span>Kehadiran:</span><span>{Math.round(22 * (1 - s.deduction / (s.baseSalary || 1)))} Hari</span></div>
-                              <div className="flex justify-between text-rose-600 font-bold"><span>Tidak Hadir:</span><span>{22 - Math.round(22 * (1 - s.deduction / (s.baseSalary || 1)))} Hari</span></div>
-                            </div>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    )}
-                  </div>
+                  <span className="text-[10px] font-semibold text-rose-600">Potongan Absensi</span>
                   <p className="font-bold text-rose-600 mt-0.5">-{formatRupiah(s.deduction)}</p>
                 </div>
 
                 <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-semibold text-amber-600">Pajak PPh21 (5%)</span>
-                    {s.tax > 0 && (
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <button className="text-amber-600 hover:underline text-[10px] font-bold flex items-center gap-0.5">
-                            Detail <Info className="h-2.5 w-2.5" />
-                          </button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-64 text-sm" side="top">
-                          <div className="space-y-2">
-                            <p className="font-semibold text-slate-900">Rincian Pajak (PPh 21)</p>
-                            <div className="text-xs text-slate-600 space-y-1">
-                              <div className="flex justify-between"><span>Gaji Pokok:</span><span>{formatRupiah(s.baseSalary)}</span></div>
-                              <div className="flex justify-between"><span>Tunjangan:</span><span>{formatRupiah(s.allowance + s.overtime + s.bonus)}</span></div>
-                              <div className="flex justify-between text-rose-600"><span>Potongan:</span><span>-{formatRupiah(s.deduction)}</span></div>
-                              <div className="flex justify-between font-bold pt-1 border-t"><span>Total Pajak 5%:</span><span className="text-amber-600">-{formatRupiah(s.tax)}</span></div>
-                            </div>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    )}
-                  </div>
+                  <span className="text-[10px] font-semibold text-amber-600">Pajak PPh21 (5%)</span>
                   <p className="font-bold text-amber-600 mt-0.5">-{formatRupiah(s.tax)}</p>
                 </div>
+              </div>
+
+              {/* Action Buttons for Mobile */}
+              <div className="flex gap-2 pt-1">
+                <Button
+                  onClick={() => setSelectedSlip(s)}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs h-9"
+                >
+                  <Eye className="mr-1.5 h-3.5 w-3.5" /> Lihat Slip Proper
+                </Button>
+                <Button
+                  onClick={() => handleDownloadPdf(s)}
+                  variant="secondary"
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl text-xs h-9 border border-slate-200"
+                >
+                  <Download className="h-3.5 w-3.5 text-blue-600" />
+                </Button>
               </div>
 
               {isManager && s.status === "draft" && (
@@ -286,7 +723,7 @@ export default function Payroll() {
 
       {/* DESKTOP TABLE VIEW */}
       <Card className="hidden md:block border-slate-200 shadow-xs overflow-hidden w-full min-w-0">
-        <CardHeader className="pb-3 border-b border-slate-100">
+        <CardHeader className="pb-3 border-b border-slate-100 flex flex-row items-center justify-between">
           <CardTitle className="text-base font-bold text-slate-900">Slip Gaji Karyawan</CardTitle>
         </CardHeader>
         <CardContent className="p-0 overflow-x-auto">
@@ -301,7 +738,7 @@ export default function Payroll() {
                 <TableHead className="text-xs font-bold text-slate-700 text-right">Pajak</TableHead>
                 <TableHead className="text-xs font-bold text-slate-700 text-right">Gaji Bersih</TableHead>
                 <TableHead className="text-xs font-bold text-slate-700">Status</TableHead>
-                {isManager && <TableHead className="w-[60px]" />}
+                <TableHead className="text-xs font-bold text-slate-700 text-right">Aksi & Download</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -324,83 +761,10 @@ export default function Payroll() {
                       {formatRupiah(s.allowance + s.overtime + s.bonus)}
                     </TableCell>
                     <TableCell className="text-right whitespace-nowrap text-xs font-medium text-rose-600">
-                      {s.deduction > 0 ? (
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <button className="inline-flex items-center gap-1 hover:underline underline-offset-4 cursor-pointer focus:outline-none">
-                              -{formatRupiah(s.deduction)}
-                              <Info className="h-3 w-3 opacity-50" />
-                            </button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-64 text-sm" side="top">
-                            <div className="space-y-2">
-                              <p className="font-semibold text-slate-900">Rincian Potongan</p>
-                              <div className="text-xs text-slate-600 space-y-1">
-                                <div className="flex justify-between">
-                                  <span>Asumsi Hari Kerja:</span>
-                                  <span>22 Hari</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>Kehadiran Tercatat:</span>
-                                  <span>{Math.round(22 * (1 - s.deduction / (s.baseSalary || 1)))} Hari</span>
-                                </div>
-                                <div className="flex justify-between text-rose-600 font-bold">
-                                  <span>Tidak Hadir/Absen:</span>
-                                  <span>{22 - Math.round(22 * (1 - s.deduction / (s.baseSalary || 1)))} Hari</span>
-                                </div>
-                              </div>
-                              <p className="text-[10px] text-slate-400 italic mt-1 leading-tight">
-                                *Pemotongan dihitung secara prorata berdasarkan jumlah hari ketidakhadiran di luar status Hadir dan Terlambat.
-                              </p>
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                      ) : (
-                        `-${formatRupiah(s.deduction)}`
-                      )}
+                      -{formatRupiah(s.deduction)}
                     </TableCell>
                     <TableCell className="text-right whitespace-nowrap text-xs font-medium text-amber-600">
-                      {s.tax > 0 ? (
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <button className="inline-flex items-center gap-1 hover:underline underline-offset-4 cursor-pointer focus:outline-none">
-                              -{formatRupiah(s.tax)}
-                              <Info className="h-3 w-3 opacity-50" />
-                            </button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-64 text-sm" side="top">
-                            <div className="space-y-2">
-                              <p className="font-semibold text-slate-900">Rincian Pajak (PPh 21)</p>
-                              <div className="pt-2 border-t text-xs text-slate-600 space-y-1">
-                                <div className="flex justify-between">
-                                  <span>Gaji Pokok:</span>
-                                  <span>{formatRupiah(s.baseSalary)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>Total Tunjangan:</span>
-                                  <span>{formatRupiah(s.allowance + s.overtime + s.bonus)}</span>
-                                </div>
-                                <div className="flex justify-between text-rose-600">
-                                  <span>Potongan Absensi:</span>
-                                  <span>-{formatRupiah(s.deduction)}</span>
-                                </div>
-                              </div>
-                              <div className="pt-2 border-t text-xs">
-                                <div className="flex justify-between font-bold text-slate-900">
-                                  <span>Dasar Pengenaan Pajak:</span>
-                                  <span>{formatRupiah(s.baseSalary + s.allowance + s.overtime + s.bonus - s.deduction)}</span>
-                                </div>
-                                <div className="flex justify-between font-bold text-amber-600 mt-1">
-                                  <span>Total Pajak (5%):</span>
-                                  <span>-{formatRupiah(s.tax)}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                      ) : (
-                        `-${formatRupiah(s.tax)}`
-                      )}
+                      -{formatRupiah(s.tax)}
                     </TableCell>
                     <TableCell className="text-right font-extrabold whitespace-nowrap text-xs text-emerald-700">
                       {formatRupiah(s.netSalary)}
@@ -411,9 +775,26 @@ export default function Payroll() {
                         {s.paidAt && <span className="ml-1 opacity-70">· {formatDateTime(s.paidAt).split(",")[0]}</span>}
                       </Badge>
                     </TableCell>
-                    {isManager && (
-                      <TableCell className="text-right">
-                        {s.status === "draft" && (
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 text-xs text-blue-600 hover:text-blue-700 font-semibold"
+                          onClick={() => setSelectedSlip(s)}
+                        >
+                          <Eye className="w-3.5 h-3.5 mr-1" /> Lihat Slip
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 text-xs border-slate-200 text-slate-700 font-semibold rounded-lg"
+                          onClick={() => handleDownloadPdf(s)}
+                          title="Download PDF"
+                        >
+                          <Download className="w-3.5 h-3.5 text-blue-600" />
+                        </Button>
+                        {isManager && s.status === "draft" && (
                           <Button
                             variant="ghost"
                             size="icon"
@@ -424,8 +805,8 @@ export default function Payroll() {
                             <CheckCheck className="h-4 w-4" />
                           </Button>
                         )}
-                      </TableCell>
-                    )}
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))
               )}
@@ -440,6 +821,144 @@ export default function Payroll() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* PROPER EXECUTIVE PAYSLIP MODAL */}
+      {selectedSlip && (
+        <Dialog open={!!selectedSlip} onOpenChange={() => setSelectedSlip(null)}>
+          <DialogContent className="max-w-2xl w-[95%] rounded-2xl p-4 sm:p-8 max-h-[95vh] overflow-y-auto">
+            <DialogHeader className="pb-3 border-b border-slate-100 flex flex-row items-center justify-between">
+              <DialogTitle className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-600" /> Slip Gaji Resmi (Official Payslip)
+              </DialogTitle>
+            </DialogHeader>
+
+            {/* FORMAL EXECUTIVE PAYSLIP DOCUMENT PREVIEW */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-8 space-y-6 shadow-sm font-sans text-slate-900">
+              
+              {/* KOP Perusahaan */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b-2 border-slate-900 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 bg-gradient-to-tr from-blue-600 to-blue-700 text-white font-black text-2xl rounded-xl flex items-center justify-center shadow-md">
+                    P
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-extrabold text-slate-900 leading-tight">Phoenix System</h2>
+                    <p className="text-[11px] font-bold text-slate-600">PT PHOENIX SISTEM INDONESIA</p>
+                    <p className="text-[10px] text-slate-400">Menara Phoenix Lt. 18, Jl. Jend. Sudirman, Jakarta Selatan 12190</p>
+                  </div>
+                </div>
+
+                <div className="sm:text-right space-y-1">
+                  <Badge variant={statusVariant(selectedSlip.status)} className="capitalize text-xs px-2.5 py-0.5">
+                    {statusLabel(selectedSlip.status)}
+                  </Badge>
+                  <p className="text-xs font-mono font-bold text-slate-700">NO: SLIP/PHX/{selectedSlip.period}/00{selectedSlip.id}</p>
+                  <p className="text-[11px] text-slate-500 font-semibold">Periode: {selectedSlip.period}</p>
+                </div>
+              </div>
+
+              {/* Data Karyawan & Pembayaran Grid */}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div className="space-y-1.5">
+                  <div className="flex justify-between"><span className="text-slate-500 font-medium">Nama Karyawan:</span><span className="font-bold text-slate-900">{selectedSlip.employeeName}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500 font-medium">NIK Karyawan:</span><span className="font-bold text-slate-900">{selectedSlip.employeeNo}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500 font-medium">Departemen:</span><span className="font-bold text-slate-900">Operational & HR</span></div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="flex justify-between"><span className="text-slate-500 font-medium">Metode Pembayaran:</span><span className="font-bold text-slate-900">Transfer Bank BCA</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500 font-medium">Tanggal Transfer:</span><span className="font-bold text-slate-900">{selectedSlip.paidAt ? formatDate(selectedSlip.paidAt) : "Proses Payroll"}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500 font-medium">Status Hubungan:</span><span className="font-bold text-slate-900">Karyawan Tetap</span></div>
+                </div>
+              </div>
+
+              {/* Tabel Rincian Penerimaan & Pemotongan */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                
+                {/* Penerimaan */}
+                <div className="space-y-2">
+                  <h3 className="text-xs font-extrabold text-blue-900 uppercase tracking-wider flex items-center gap-1">
+                    <Banknote className="w-3.5 h-3.5 text-blue-600" /> I. Penerimaan (Earnings)
+                  </h3>
+                  <div className="border border-slate-200 rounded-xl overflow-hidden text-xs">
+                    <div className="flex justify-between p-2.5 bg-slate-50 border-b border-slate-100 font-semibold text-slate-600">
+                      <span>Komponen</span><span>Jumlah</span>
+                    </div>
+                    <div className="p-2.5 space-y-2">
+                      <div className="flex justify-between"><span>Gaji Pokok</span><span className="font-medium">{formatRupiah(selectedSlip.baseSalary)}</span></div>
+                      <div className="flex justify-between"><span>Tunjangan (10%)</span><span className="font-medium">{formatRupiah(selectedSlip.allowance)}</span></div>
+                      <div className="flex justify-between"><span>Lembur & Bonus</span><span className="font-medium">{formatRupiah(selectedSlip.overtime + selectedSlip.bonus)}</span></div>
+                    </div>
+                    <div className="flex justify-between p-2.5 bg-slate-100 font-bold text-slate-900 border-t border-slate-200">
+                      <span>Gaji Kotor (Gross)</span><span>{formatRupiah(selectedSlip.baseSalary + selectedSlip.allowance + selectedSlip.overtime + selectedSlip.bonus)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pemotongan */}
+                <div className="space-y-2">
+                  <h3 className="text-xs font-extrabold text-rose-900 uppercase tracking-wider flex items-center gap-1">
+                    <Receipt className="w-3.5 h-3.5 text-rose-600" /> II. Pemotongan (Deductions)
+                  </h3>
+                  <div className="border border-slate-200 rounded-xl overflow-hidden text-xs">
+                    <div className="flex justify-between p-2.5 bg-slate-50 border-b border-slate-100 font-semibold text-slate-600">
+                      <span>Komponen</span><span>Jumlah</span>
+                    </div>
+                    <div className="p-2.5 space-y-2">
+                      <div className="flex justify-between"><span>Potongan Absensi</span><span className="font-medium text-rose-600">-{formatRupiah(selectedSlip.deduction)}</span></div>
+                      <div className="flex justify-between"><span>Pajak PPh 21 (5%)</span><span className="font-medium text-amber-600">-{formatRupiah(selectedSlip.tax)}</span></div>
+                    </div>
+                    <div className="flex justify-between p-2.5 bg-slate-100 font-bold text-rose-700 border-t border-slate-200">
+                      <span>Total Pemotongan</span><span>-{formatRupiah(selectedSlip.deduction + selectedSlip.tax)}</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Total Gaji Bersih Banner */}
+              <div className="bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-2xl p-5 shadow-md space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-100">TOTAL GAJI BERSIH DITERIMA (TAKE HOME PAY)</span>
+                  <span className="text-xl sm:text-2xl font-black">{formatRupiah(selectedSlip.netSalary)}</span>
+                </div>
+                <div className="pt-2 border-t border-emerald-500/40 text-xs italic text-emerald-50 leading-tight">
+                  Terbilang: # {terbilang(selectedSlip.netSalary)} Rupiah #
+                </div>
+              </div>
+
+              {/* Tanda Tangan & Legalisasi */}
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200 text-xs">
+                <div className="text-center space-y-8">
+                  <span className="text-slate-500 font-medium block">Penerima Gaji,</span>
+                  <p className="font-bold text-slate-900 underline">{selectedSlip.employeeName}</p>
+                </div>
+                <div className="text-center space-y-3">
+                  <span className="text-slate-500 font-medium block">Jakarta, {new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</span>
+                  <div className="inline-block border-2 border-dashed border-emerald-600 text-emerald-700 px-3 py-1 rounded-lg text-[10px] font-black uppercase rotate-[-2deg]">
+                    VERIFIED & PAID • PHX
+                  </div>
+                  <p className="font-bold text-slate-900 underline block pt-1">PT Phoenix Sistem Indonesia</p>
+                </div>
+              </div>
+
+            </div>
+
+            <DialogFooter className="pt-3 flex flex-col sm:flex-row gap-2">
+              <Button 
+                onClick={() => handleDownloadPdf(selectedSlip)} 
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md w-full sm:w-auto"
+              >
+                <Download className="w-4 h-4 mr-2" /> Download PDF / Cetak Slip
+              </Button>
+              <Button variant="outline" className="rounded-xl w-full sm:w-auto" onClick={() => setSelectedSlip(null)}>
+                Tutup
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
     </div>
   );
 }
