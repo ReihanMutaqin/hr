@@ -22,12 +22,9 @@ import {
   CartesianGrid,
   XAxis,
   YAxis,
-  Line,
-  LineChart,
+  Cell,
   Pie,
   PieChart,
-  Cell,
-  ResponsiveContainer
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -47,10 +44,6 @@ import {
 
 const deptChartConfig: ChartConfig = {
   total: { label: "Jumlah Karyawan", color: "#2563eb" },
-};
-
-const payrollChartConfig: ChartConfig = {
-  totalNet: { label: "Total Gaji Bersih", color: "#10b981" },
 };
 
 const CANDIDATE_COLORS: Record<string, string> = {
@@ -78,16 +71,16 @@ function StatCard({
   accentText: string;
 }) {
   return (
-    <Card className="border-slate-200/80 shadow-xs hover:shadow-md transition-shadow">
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{title}</p>
-            <p className="text-2xl font-extrabold text-slate-900 tracking-tight">{value}</p>
-            {hint && <p className="text-xs text-slate-500 font-medium">{hint}</p>}
+    <Card className="border-slate-200/80 shadow-xs hover:shadow-md transition-shadow min-w-0 overflow-hidden">
+      <CardContent className="p-4 sm:p-5 min-w-0">
+        <div className="flex items-start justify-between gap-2">
+          <div className="space-y-1 min-w-0 flex-1">
+            <p className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider truncate min-w-0">{title}</p>
+            <p className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight truncate">{value}</p>
+            {hint && <p className="text-[11px] sm:text-xs text-slate-500 font-medium truncate">{hint}</p>}
           </div>
-          <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${accentBg} ${accentText} shrink-0`}>
-            <Icon className="h-5.5 w-5.5" />
+          <div className={`flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl ${accentBg} ${accentText} shrink-0`}>
+            <Icon className="h-5 w-5 sm:h-5.5 sm:w-5.5" />
           </div>
         </div>
       </CardContent>
@@ -99,13 +92,12 @@ export default function Dashboard() {
   const { user } = useAuth();
   const isManager = user?.role === "admin" || user?.role === "hr";
   const { data, isLoading } = trpc.misc.dashboard.useQuery();
-  const { data: aiLogs } = trpc.misc.aiLogs.useQuery(undefined, { enabled: isManager });
 
   if (isLoading || !data) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 w-full min-w-0 overflow-x-hidden">
         <Skeleton className="h-16 w-full rounded-2xl" />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
             <Skeleton key={i} className="h-28 rounded-2xl" />
           ))}
@@ -119,11 +111,6 @@ export default function Dashboard() {
   }
 
   const c = data.counts;
-  const payrollData = (data.payrollByPeriod || []).slice().reverse().map((p) => ({
-    period: p.period,
-    totalNet: Number(p.totalNet ?? 0),
-  }));
-  
   const candData = (data.candidatesByStatus || []).map((s) => ({
     name: statusLabel(s.status),
     value: s.total,
@@ -138,60 +125,60 @@ export default function Dashboard() {
   });
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-6 pb-8 w-full min-w-0 overflow-x-hidden">
       
       {/* Welcome Header Banner */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+      <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full min-w-0 overflow-hidden">
+        <div className="space-y-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
               Selamat datang kembali, {user?.fullName} 👋
             </h1>
             <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700 font-semibold text-xs capitalize">
               {user?.role === "admin" ? "Super Admin" : user?.role === "hr" ? "HR Manager" : "Karyawan"}
             </Badge>
           </div>
-          <p className="text-sm text-slate-500">
+          <p className="text-xs sm:text-sm text-slate-500">
             Ringkasan operasional HR & manajemen talenta • <span className="font-medium text-slate-700">{todayFormatted}</span>
           </p>
         </div>
 
         {/* Quick Action Shortcuts */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="grid grid-cols-2 sm:flex flex-wrap items-center gap-2 w-full md:w-auto">
           {isManager && (
             <>
-              <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-xs" asChild>
+              <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-xs h-10 text-xs" asChild>
                 <Link to="/recruitment">
-                  <Plus className="w-4 h-4 mr-1.5" /> Buat Lowongan
+                  <Plus className="w-3.5 h-3.5 mr-1" /> Lowongan
                 </Link>
               </Button>
-              <Button size="sm" variant="outline" className="border-slate-200 text-slate-700 rounded-xl" asChild>
+              <Button size="sm" variant="outline" className="border-slate-200 text-slate-700 rounded-xl h-10 text-xs" asChild>
                 <Link to="/employees">
-                  <UserPlus className="w-4 h-4 mr-1.5 text-blue-600" /> Karyawan
+                  <UserPlus className="w-3.5 h-3.5 mr-1 text-blue-600" /> Karyawan
                 </Link>
               </Button>
             </>
           )}
-          <Button size="sm" variant="outline" className="border-slate-200 text-slate-700 rounded-xl" asChild>
+          <Button size="sm" variant="outline" className="border-slate-200 text-slate-700 rounded-xl h-10 text-xs" asChild>
             <Link to="/attendance">
-              <Clock className="w-4 h-4 mr-1.5 text-emerald-600" /> Absensi
+              <Clock className="w-3.5 h-3.5 mr-1 text-emerald-600" /> Absensi
             </Link>
           </Button>
-          <Button size="sm" variant="outline" className="border-slate-200 text-slate-700 rounded-xl" asChild>
+          <Button size="sm" variant="outline" className="border-slate-200 text-slate-700 rounded-xl h-10 text-xs" asChild>
             <Link to="/leave">
-              <CalendarDays className="w-4 h-4 mr-1.5 text-amber-600" /> Cuti
+              <CalendarDays className="w-3.5 h-3.5 mr-1 text-amber-600" /> Cuti
             </Link>
           </Button>
         </div>
       </div>
 
       {/* KPI Stat Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4 w-full min-w-0">
         <StatCard
           title="Karyawan Aktif"
           value={formatNumber(c.employees)}
           icon={Users}
-          hint={`${c.departments} Departemen terdaftar`}
+          hint={`${c.departments} Departemen`}
           accentBg="bg-blue-50"
           accentText="text-blue-600"
         />
@@ -199,7 +186,7 @@ export default function Dashboard() {
           title="Lowongan Terbuka"
           value={formatNumber(c.openJobs)}
           icon={Briefcase}
-          hint={`${c.candidates} Pelamar terdaftar`}
+          hint={`${c.candidates} Pelamar`}
           accentBg="bg-slate-100"
           accentText="text-slate-700"
         />
@@ -207,7 +194,7 @@ export default function Dashboard() {
           title="Hadir Hari Ini"
           value={formatNumber(c.presentToday)}
           icon={CalendarCheck}
-          hint={`dari total ${c.employees} karyawan`}
+          hint={`dari ${c.employees} karyawan`}
           accentBg="bg-emerald-50"
           accentText="text-emerald-600"
         />
@@ -222,21 +209,21 @@ export default function Dashboard() {
       </div>
 
       {/* Main Charts Grid: 2 Columns */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3 w-full min-w-0">
         
         {/* Department Distribution Bar Chart */}
-        <Card className="lg:col-span-2 border-slate-200 shadow-xs">
+        <Card className="lg:col-span-2 border-slate-200 shadow-xs min-w-0 overflow-hidden">
           <CardHeader className="pb-3 border-b border-slate-100">
-            <CardTitle className="flex items-center gap-2 text-base font-bold text-slate-900">
-              <Building2 className="h-4.5 w-4.5 text-blue-600" />
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base font-bold text-slate-900">
+              <Building2 className="h-4.5 w-4.5 text-blue-600 shrink-0" />
               Distribusi Karyawan per Departemen
             </CardTitle>
             <CardDescription className="text-xs">
               Jumlah tenaga kerja aktif di tiap unit kerja perusahaan
             </CardDescription>
           </CardHeader>
-          <CardContent className="pt-4">
-            <ChartContainer config={deptChartConfig} className="h-[280px] w-full">
+          <CardContent className="pt-4 overflow-x-auto min-w-0">
+            <ChartContainer config={deptChartConfig} className="h-[280px] w-full min-w-[300px]">
               <BarChart data={data.byDept} margin={{ left: -15, right: 10, top: 10, bottom: 25 }}>
                 <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={11} interval={0} angle={-15} textAnchor="end" height={55} />
@@ -249,20 +236,20 @@ export default function Dashboard() {
         </Card>
 
         {/* Candidate Funnel Donut Chart */}
-        <Card className="border-slate-200 shadow-xs">
+        <Card className="border-slate-200 shadow-xs min-w-0 overflow-hidden">
           <CardHeader className="pb-3 border-b border-slate-100">
-            <CardTitle className="flex items-center gap-2 text-base font-bold text-slate-900">
-              <Briefcase className="h-4.5 w-4.5 text-blue-600" />
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base font-bold text-slate-900">
+              <Briefcase className="h-4.5 w-4.5 text-blue-600 shrink-0" />
               Funnel Status Pelamar
             </CardTitle>
             <CardDescription className="text-xs">
               Distribusi tahap rekrutmen kandidat
             </CardDescription>
           </CardHeader>
-          <CardContent className="pt-4">
+          <CardContent className="pt-4 min-w-0">
             {candData.length > 0 ? (
-              <div className="space-y-4">
-                <ChartContainer config={{}} className="mx-auto h-[200px] w-full">
+              <div className="space-y-4 min-w-0">
+                <ChartContainer config={{}} className="mx-auto h-[200px] w-full min-w-0">
                   <PieChart>
                     <ChartTooltip content={<ChartTooltipContent hideLabel />} />
                     <Pie data={candData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={85} paddingAngle={3}>
@@ -275,193 +262,19 @@ export default function Dashboard() {
                 
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
                   {candData.map((d) => (
-                    <div key={d.name} className="flex items-center gap-2 text-xs">
+                    <div key={d.name} className="flex items-center gap-2 text-xs min-w-0">
                       <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: d.fill }} />
                       <span className="text-slate-600 truncate">{d.name}</span>
-                      <span className="font-bold text-slate-800 ml-auto">{d.value}</span>
+                      <span className="font-bold text-slate-900 ml-auto">{d.value}</span>
                     </div>
                   ))}
                 </div>
               </div>
             ) : (
-              <p className="py-16 text-center text-xs text-slate-400 font-medium">Belum ada data pelamar</p>
+              <p className="text-xs text-slate-400 text-center py-12 italic">Belum ada data kandidat</p>
             )}
           </CardContent>
         </Card>
-
-      </div>
-
-      {/* Payroll Trend & Recruitment Activity Grid */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        
-        {/* Payroll Trend Line Chart */}
-        <Card className="lg:col-span-2 border-slate-200 shadow-xs">
-          <CardHeader className="pb-3 border-b border-slate-100 flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2 text-base font-bold text-slate-900">
-                <Wallet className="h-4.5 w-4.5 text-emerald-600" />
-                Tren Pengeluaran Payroll
-              </CardTitle>
-              <CardDescription className="text-xs mt-0.5">
-                Total gaji bersih (Net) per periode • Periode Terakhir: <strong className="text-slate-900">{formatRupiah(data.payrollMonthTotal)}</strong>
-              </CardDescription>
-            </div>
-            <Button variant="ghost" size="sm" className="text-xs text-blue-600 hover:text-blue-700" asChild>
-              <Link to="/payroll">
-                Kelola Payroll <ArrowRight className="w-3.5 h-3.5 ml-1" />
-              </Link>
-            </Button>
-          </CardHeader>
-          <CardContent className="pt-4">
-            {payrollData.length > 0 ? (
-              <ChartContainer config={payrollChartConfig} className="h-[240px] w-full">
-                <LineChart data={payrollData} margin={{ left: 5, right: 15, top: 10, bottom: 5 }}>
-                  <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="period" tickLine={false} axisLine={false} fontSize={11} />
-                  <YAxis
-                    tickLine={false}
-                    axisLine={false}
-                    fontSize={11}
-                    tickFormatter={(v: number) => `${Math.round(v / 1_000_000)}jt`}
-                  />
-                  <ChartTooltip
-                    content={<ChartTooltipContent formatter={(v) => formatRupiah(Number(v))} />}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="totalNet"
-                    stroke="#10b981"
-                    strokeWidth={2.5}
-                    dot={{ r: 4, fill: "#10b981", strokeWidth: 2, stroke: "#ffffff" }}
-                  />
-                </LineChart>
-              </ChartContainer>
-            ) : (
-              <p className="py-16 text-center text-xs text-slate-400 font-medium">Belum ada riwayat penggajian</p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Recruitment Evaluation Activity */}
-        {isManager && (
-          <Card className="border-slate-200 shadow-xs">
-            <CardHeader className="pb-3 border-b border-slate-100">
-              <CardTitle className="flex items-center gap-2 text-base font-bold text-slate-900">
-                <Activity className="h-4.5 w-4.5 text-blue-600" />
-                Aktivitas Evaluasi Rekrutmen
-              </CardTitle>
-              <CardDescription className="text-xs">Riwayat pemeringkatan kualifikasi berkas</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-4">
-              <div className="space-y-3">
-                {(aiLogs ?? []).slice(0, 5).map((log) => (
-                  <div key={log.id} className="flex items-start gap-2.5 text-xs p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                    <Activity className="mt-0.5 h-3.5 w-3.5 shrink-0 text-blue-600" />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-1 mb-0.5">
-                        <span className="font-semibold text-slate-800 uppercase tracking-wider text-[10px] bg-white border border-slate-200 px-1.5 py-0.5 rounded">
-                          {log.feature}
-                        </span>
-                        <span className="text-[10px] text-slate-400">{formatDateTime(log.createdAt)}</span>
-                      </div>
-                      <p className="truncate text-slate-600 font-medium mt-1">
-                        {log.docCount} Dokumen Diproses • {log.fallback ? "Analisis Keyword" : "Match Evaluator"}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                {(aiLogs ?? []).length === 0 && (
-                  <p className="py-12 text-center text-xs text-slate-400 font-medium">
-                    Belum ada aktivitas evaluasi berkas.
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-      </div>
-
-      {/* Recent Candidates & Leave Requests Tables */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        
-        {/* Recent Candidates */}
-        <Card className="border-slate-200 shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 border-b border-slate-100">
-            <div>
-              <CardTitle className="text-base font-bold text-slate-900">Pelamar Terbaru</CardTitle>
-              <CardDescription className="text-xs">Kandidat yang baru mendaftar</CardDescription>
-            </div>
-            {isManager && (
-              <Button variant="ghost" size="sm" className="text-xs text-blue-600 hover:text-blue-700" asChild>
-                <Link to="/recruitment">
-                  Lihat semua <ArrowRight className="ml-1 h-3.5 w-3.5" />
-                </Link>
-              </Button>
-            )}
-          </CardHeader>
-          <CardContent className="pt-4">
-            <div className="space-y-3">
-              {data.recentCandidates.map((cand) => (
-                <div key={cand.id} className="flex items-center justify-between gap-3 text-xs p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-white transition-colors">
-                  <div className="min-w-0">
-                    <p className="truncate font-bold text-slate-800 text-sm">{cand.fullName}</p>
-                    <p className="truncate text-slate-500 mt-0.5">{cand.jobTitle}</p>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-2">
-                    {cand.aiScore && (
-                      <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700 font-semibold text-xs">
-                        Match {Number(cand.aiScore).toFixed(0)}%
-                      </Badge>
-                    )}
-                    <Badge variant={statusVariant(cand.status)} className="capitalize text-xs">
-                      {statusLabel(cand.status)}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-              {data.recentCandidates.length === 0 && (
-                <p className="py-8 text-center text-xs text-slate-400 font-medium">Belum ada pelamar baru</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Recent Leave Requests */}
-        <Card className="border-slate-200 shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 border-b border-slate-100">
-            <div>
-              <CardTitle className="text-base font-bold text-slate-900">Pengajuan Cuti Terbaru</CardTitle>
-              <CardDescription className="text-xs">Permohonan izin & cuti karyawan</CardDescription>
-            </div>
-            <Button variant="ghost" size="sm" className="text-xs text-blue-600 hover:text-blue-700" asChild>
-              <Link to="/leave">
-                Lihat semua <ArrowRight className="ml-1 h-3.5 w-3.5" />
-              </Link>
-            </Button>
-          </CardHeader>
-          <CardContent className="pt-4">
-            <div className="space-y-3">
-              {data.recentLeaves.map((l) => (
-                <div key={l.id} className="flex items-center justify-between gap-3 text-xs p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-white transition-colors">
-                  <div className="min-w-0">
-                    <p className="truncate font-bold text-slate-800 text-sm">{l.employeeName}</p>
-                    <p className="truncate text-slate-500 mt-0.5">
-                      {statusLabel(l.type)} • {formatDate(l.startDate)} s/d {formatDate(l.endDate)} ({l.days} hari)
-                    </p>
-                  </div>
-                  <Badge variant={statusVariant(l.status)} className="capitalize text-xs">
-                    {statusLabel(l.status)}
-                  </Badge>
-                </div>
-              ))}
-              {data.recentLeaves.length === 0 && (
-                <p className="py-8 text-center text-xs text-slate-400 font-medium">Belum ada pengajuan cuti</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
       </div>
 
     </div>
