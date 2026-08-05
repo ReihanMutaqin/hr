@@ -152,7 +152,7 @@ export default function AppLayout() {
       </aside>
 
       {/* Main Column */}
-      <div className="flex flex-1 flex-col lg:pl-64">
+      <div className="flex flex-1 flex-col lg:pl-64 min-w-0 w-full overflow-x-hidden">
         
         {/* Header Bar */}
         <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-slate-200/80 bg-white/90 px-4 backdrop-blur-md lg:px-8 shadow-2xs">
@@ -208,7 +208,7 @@ export default function AppLayout() {
         </header>
 
         {/* Page Viewport */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+        <main className="flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full min-w-0 overflow-x-hidden">
           <Outlet />
         </main>
 
