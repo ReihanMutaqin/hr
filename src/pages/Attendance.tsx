@@ -15,7 +15,11 @@ import {
   ExternalLink,
   Eye,
   Navigation,
-  Check
+  Check,
+  Sun,
+  Sunset,
+  Moon,
+  AlertTriangle
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -51,6 +55,14 @@ import { formatTime, formatDate, statusLabel, statusVariant } from "@/lib/format
 
 const ATT_STATUSES = ["present", "late", "absent", "leave", "sick", "holiday"] as const;
 
+type ShiftOption = "pagi" | "siang" | "malam";
+
+const SHIFT_OPTIONS = [
+  { id: "pagi", label: "Shift Pagi", hours: "07:00 – 15:00", icon: Sun, color: "text-amber-500 bg-amber-50 border-amber-200" },
+  { id: "siang", label: "Shift Siang", hours: "15:00 – 23:00", icon: Sunset, color: "text-blue-500 bg-blue-50 border-blue-200" },
+  { id: "malam", label: "Shift Malam", hours: "23:00 – 07:00", icon: Moon, color: "text-indigo-500 bg-indigo-50 border-indigo-200" },
+] as const;
+
 export default function Attendance() {
   const { user } = useAuth();
   const isManager = user?.role === "admin" || user?.role === "hr";
@@ -74,6 +86,7 @@ export default function Attendance() {
   // Camera & GPS Attendance Modal State
   const [cameraModalOpen, setCameraModalOpen] = useState(false);
   const [attendanceType, setAttendanceType] = useState<"checkIn" | "checkOut">("checkIn");
+  const [selectedShift, setSelectedShift] = useState<ShiftOption>("pagi");
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
   
   // GPS State
@@ -92,7 +105,7 @@ export default function Attendance() {
   const { data: records, isLoading } = trpc.attendance.list.useQuery({
     from,
     to,
-    employeeId: empFilter !== "all" ? Number(empFilter) : undefined,
+    employeeId: isManager && empFilter !== "all" ? Number(empFilter) : undefined,
   });
   const { data: summary } = trpc.attendance.todaySummary.useQuery();
   const { data: employees } = trpc.employee.list.useQuery({}, { enabled: isManager });
@@ -104,7 +117,12 @@ export default function Attendance() {
 
   const checkIn = trpc.attendance.checkIn.useMutation({
     onSuccess: (r) => {
-      toast.success(r.status === "late" ? "Check-in dicatat (terlambat) dengan Foto & GPS Alamat" : "Check-in berhasil dengan Foto & GPS Alamat");
+      const lateMsg = r.lateDurationStr ? ` (${r.lateDurationStr})` : "";
+      toast.success(
+        r.status === "late" 
+          ? `Check-in ${r.shiftName} dicatat${lateMsg}` 
+          : `Check-in ${r.shiftName} berhasil (Tepat Waktu)`
+      );
       closeCameraModal();
       invalidate();
     },
@@ -128,6 +146,13 @@ export default function Attendance() {
   // Start Camera and fetch GPS Location with Full Reverse Geocoding Address
   const startCameraAndGps = (type: "checkIn" | "checkOut") => {
     setAttendanceType(type);
+    
+    // Auto detect shift based on current time
+    const currentHour = new Date().getHours();
+    if (currentHour >= 5 && currentHour < 13) setSelectedShift("pagi");
+    else if (currentHour >= 13 && currentHour < 21) setSelectedShift("siang");
+    else setSelectedShift("malam");
+
     setCapturedPhoto(null);
     setGpsError(null);
     setGpsLoading(true);
@@ -163,7 +188,7 @@ export default function Attendance() {
             }
           } catch (err) {
             console.warn("Reverse geocoding error:", err);
-          } finally {
+          } fontFinally: {
             setGpsLoading(false);
           }
         },
@@ -250,6 +275,7 @@ export default function Attendance() {
     }
 
     const payload = {
+      shift: selectedShift,
       photoBase64: capturedPhoto,
       latitude: gpsLocation?.lat,
       longitude: gpsLocation?.lng,
@@ -273,7 +299,9 @@ export default function Attendance() {
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Presensi & Absensi Karyawan</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Absensi kehadiran kerja karyawan berbasis <span className="font-semibold text-slate-700">Foto Kamera Selfie & Alamat Lokasi GPS Lengkap</span>
+            {isManager 
+              ? "Kelola presensi seluruh karyawan berdasarkan shift kerja, foto selfie, & lokasi GPS" 
+              : "Riwayat presensi kehadiran pribadi berbasis Shift Kerja, Foto Selfie, & Lokasi GPS"}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -365,9 +393,11 @@ export default function Attendance() {
           <Label className="text-xs font-semibold text-slate-700">Sampai</Label>
           <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="w-[160px] rounded-xl text-xs" />
         </div>
+
+        {/* HR ONLY: Filter Employee */}
         {isManager && (
           <div className="space-y-1">
-            <Label className="text-xs font-semibold text-slate-700">Filter Karyawan</Label>
+            <Label className="text-xs font-semibold text-slate-700">Filter Karyawan (Khusus HR)</Label>
             <Select value={empFilter} onValueChange={setEmpFilter}>
               <SelectTrigger className="w-[220px] rounded-xl text-xs"><SelectValue /></SelectTrigger>
               <SelectContent className="rounded-xl">
@@ -383,8 +413,15 @@ export default function Attendance() {
 
       {/* Main Attendance Records Table */}
       <Card className="border-slate-200 shadow-xs overflow-hidden">
-        <CardHeader className="pb-3 border-b border-slate-100">
-          <CardTitle className="text-base font-bold text-slate-900">Riwayat Presensi Karyawan</CardTitle>
+        <CardHeader className="pb-3 border-b border-slate-100 flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-base font-bold text-slate-900">
+              {isManager ? "Riwayat Presensi Seluruh Karyawan" : "Riwayat Presensi Saya"}
+            </CardTitle>
+            <CardDescription className="text-xs">
+              {isManager ? "Manajemen rekap absensi karyawan" : "Daftar hadir dan durasi keterlambatan Anda"}
+            </CardDescription>
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
@@ -392,11 +429,11 @@ export default function Attendance() {
               <TableRow>
                 <TableHead className="text-xs font-bold text-slate-700">Tanggal</TableHead>
                 <TableHead className="text-xs font-bold text-slate-700">Karyawan</TableHead>
+                <TableHead className="text-xs font-bold text-slate-700">Shift Kerja</TableHead>
                 <TableHead className="text-xs font-bold text-slate-700">Foto & GPS Masuk</TableHead>
                 <TableHead className="text-xs font-bold text-slate-700">Foto & GPS Keluar</TableHead>
-                <TableHead className="text-xs font-bold text-slate-700">Jam Masuk</TableHead>
-                <TableHead className="text-xs font-bold text-slate-700">Jam Keluar</TableHead>
-                <TableHead className="text-xs font-bold text-slate-700">Status</TableHead>
+                <TableHead className="text-xs font-bold text-slate-700">Jam Masuk / Keluar</TableHead>
+                <TableHead className="text-xs font-bold text-slate-700">Status & Terlambat</TableHead>
                 <TableHead className="text-xs font-bold text-slate-700 text-right">Detail</TableHead>
               </TableRow>
             </TableHeader>
@@ -414,6 +451,13 @@ export default function Attendance() {
                     <TableCell>
                       <p className="font-bold text-slate-900 text-xs">{r.employeeName}</p>
                       <p className="text-[11px] text-slate-400">{r.employeeNo}</p>
+                    </TableCell>
+
+                    {/* Shift Info */}
+                    <TableCell>
+                      <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700 font-semibold text-[11px]">
+                        {r.shiftName || "Shift Pagi"} ({r.shiftHours || "07:00 – 15:00"})
+                      </Badge>
                     </TableCell>
                     
                     {/* Foto Selfie & GPS Masuk */}
@@ -466,13 +510,25 @@ export default function Attendance() {
                       )}
                     </TableCell>
 
-                    <TableCell className="text-xs font-medium text-slate-700">{formatTime(r.checkIn)}</TableCell>
-                    <TableCell className="text-xs font-medium text-slate-700">{formatTime(r.checkOut)}</TableCell>
-                    <TableCell>
-                      <Badge variant={statusVariant(r.status)} className="capitalize text-xs">
-                        {statusLabel(r.status)}
-                      </Badge>
+                    <TableCell className="text-xs font-medium text-slate-700">
+                      <div><strong className="text-blue-700">In:</strong> {formatTime(r.checkIn)}</div>
+                      <div><strong className="text-amber-700">Out:</strong> {formatTime(r.checkOut)}</div>
                     </TableCell>
+
+                    {/* Status & Durasi Terlambat */}
+                    <TableCell>
+                      <div className="space-y-1">
+                        <Badge variant={statusVariant(r.status)} className="capitalize text-xs">
+                          {statusLabel(r.status)}
+                        </Badge>
+                        {r.status === "late" && r.lateDurationStr && (
+                          <div className="text-[10px] font-semibold text-rose-600 flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" /> {r.lateDurationStr}
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+
                     <TableCell className="text-right">
                       <Button variant="ghost" size="sm" className="h-8 text-xs text-blue-600 hover:text-blue-700" onClick={() => setSelectedRecord(r)}>
                         <Eye className="w-3.5 h-3.5 mr-1" /> Detail
@@ -507,6 +563,37 @@ export default function Attendance() {
           </DialogHeader>
 
           <div className="space-y-4">
+
+            {/* OPSI SHIFT KERJA (Khusus Check-In) */}
+            {attendanceType === "checkIn" && (
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-blue-600" /> Pilih Shift Kerja Hari Ini:
+                </Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {SHIFT_OPTIONS.map((s) => {
+                    const IconComp = s.icon;
+                    const selected = selectedShift === s.id;
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => setSelectedShift(s.id as ShiftOption)}
+                        className={`p-2.5 rounded-xl border text-left transition-all ${
+                          selected 
+                            ? "bg-blue-50 border-blue-600 ring-2 ring-blue-500/20 text-blue-900 font-bold" 
+                            : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700"
+                        }`}
+                      >
+                        <IconComp className={`w-4 h-4 mb-1 ${selected ? "text-blue-600" : "text-slate-400"}`} />
+                        <div className="text-xs leading-none font-bold">{s.label}</div>
+                        <div className="text-[10px] text-slate-400 mt-1 font-mono">{s.hours}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             
             {/* Live Camera / Captured Image Container */}
             <div className="relative rounded-2xl overflow-hidden bg-slate-950 aspect-[4/3] flex items-center justify-center border border-slate-800 shadow-inner">
@@ -611,9 +698,26 @@ export default function Attendance() {
                   <p className="font-bold text-slate-900 text-base">{selectedRecord.employeeName}</p>
                   <p className="text-xs text-slate-500">{selectedRecord.employeeNo} • {formatDate(selectedRecord.date)}</p>
                 </div>
-                <Badge variant={statusVariant(selectedRecord.status)} className="capitalize text-xs">
-                  {statusLabel(selectedRecord.status)}
-                </Badge>
+                <div className="text-right space-y-1">
+                  <Badge variant={statusVariant(selectedRecord.status)} className="capitalize text-xs">
+                    {statusLabel(selectedRecord.status)}
+                  </Badge>
+                  {selectedRecord.status === "late" && selectedRecord.lateDurationStr && (
+                    <p className="text-xs font-bold text-rose-600 flex items-center justify-end gap-1">
+                      <AlertTriangle className="w-3.5 h-3.5" /> {selectedRecord.lateDurationStr}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Shift info badge */}
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between text-xs">
+                <span className="font-semibold text-blue-900">
+                  Shift Kerja: {selectedRecord.shiftName || "Shift Pagi"}
+                </span>
+                <span className="font-mono text-blue-700 font-bold">
+                  Jam Kerja: {selectedRecord.shiftHours || "07:00 – 15:00"}
+                </span>
               </div>
 
               {/* Grid 2 Columns: Check-In vs Check-Out */}
