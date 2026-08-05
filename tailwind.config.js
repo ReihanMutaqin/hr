@@ -4,6 +4,10 @@ module.exports = {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['"ITC Lubalin Graph"', '"Lubalin Graph"', '"Roboto Slab"', '"Arvo"', '"Zilla Slab"', 'Rockwell', 'serif'],
+        serif: ['"ITC Lubalin Graph"', '"Lubalin Graph"', '"Roboto Slab"', '"Arvo"', '"Zilla Slab"', 'Rockwell', 'serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

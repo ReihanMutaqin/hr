@@ -1,6 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Arvo:ital,wght@0,400;0,700;1,400;1,700&family=Roboto+Slab:wght@300;400;500;600;700;800&family=Zilla+Slab:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'ITC Lubalin Graph', 'Lubalin Graph', 'Roboto Slab', 'Arvo', 'Zilla Slab', Rockwell, serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'ITC Lubalin Graph', 'Lubalin Graph', 'Roboto Slab', 'Arvo', 'Zilla Slab', Rockwell, serif;
+  }
+}
 
 @layer base {
   :root {
