@@ -178,18 +178,16 @@ export default function Performance() {
                   </TableCell>
                 </TableRow>
               ) : (
-                    <TableCell className="text-center">
-                      <Badge variant="outline">{r.reviewerScore}</Badge>
+                reviews?.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell>
+                      <p className="font-medium">{r.employeeName}</p>
+                      <p className="text-xs text-muted-foreground">{r.departmentName ?? "-"}</p>
                     </TableCell>
-                    <TableCell className="text-center">
-                      {r.aiScore ? (
-                        <Badge className="bg-indigo-600">
-                          <Sparkles className="mr-1 h-3 w-3" />
-                          {Number(r.aiScore).toFixed(0)}
-                        </Badge>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">-</span>
-                      )}
+                    <TableCell className="text-sm font-mono">{r.period}</TableCell>
+                    <TableCell className="text-sm">{r.reviewerName}</TableCell>
+                    <TableCell className="text-right font-medium">
+                      <Badge variant="outline" className="font-mono">{r.reviewerScore}</Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant={statusVariant(r.status)}>{statusLabel(r.status)}</Badge>
@@ -210,14 +208,6 @@ export default function Performance() {
                     )}
                   </TableRow>
                 ))
-              )}
-              {!isLoading && (reviews ?? []).length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7} className="py-12 text-center text-sm text-muted-foreground">
-                    <TrendingUp className="mx-auto mb-2 h-8 w-8" />
-                    Belum ada performance review
-                  </TableCell>
-                </TableRow>
               )}
             </TableBody>
           </Table>
