@@ -142,7 +142,7 @@ export default function Candidates() {
             Kelola master data kandidat atau unggah banyak CV PDF sekaligus
           </p>
         </div>
-        <Button onClick={() => setBatchDialog(true)} className="bg-indigo-600 hover:bg-indigo-700">
+        <Button onClick={() => setBatchDialog(true)} className="bg-blue-600 hover:bg-blue-700">
           <UploadCloud className="mr-2 h-4 w-4" /> Batch Upload CV
         </Button>
       </div>
@@ -205,7 +205,7 @@ export default function Candidates() {
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                        className="text-blue-600 hover:text-indigo-700 hover:bg-indigo-50"
                         onClick={() => setViewCvDialog({ open: true, title: cand.fullName, candidateId: cand.id, textFallback: cand.cvText })}
                       >
                         <FileText className="h-4 w-4 mr-1" /> CV
@@ -280,7 +280,7 @@ export default function Candidates() {
                   <span>{progress}%</span>
                 </div>
                 <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-indigo-600 transition-all duration-300" style={{ width: `${progress}%` }} />
+                  <div className="h-full bg-blue-600 transition-all duration-300" style={{ width: `${progress}%` }} />
                 </div>
               </div>
             )}
@@ -291,7 +291,7 @@ export default function Candidates() {
             <Button 
               onClick={handleBatchUpload}
               disabled={isProcessing || files.length === 0 || !selectedJobId || batchCreate.isPending}
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="bg-blue-600 hover:bg-blue-700"
             >
               {isProcessing || batchCreate.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <UploadCloud className="h-4 w-4 mr-2" />}
               Mulai Batch Upload

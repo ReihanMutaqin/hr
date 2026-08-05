@@ -216,9 +216,9 @@ export default function Employees() {
       <Card className="border-slate-200 bg-slate-50/80">
         <CardContent className="p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Search className="h-4 w-4 text-indigo-600" />
-            <span className="text-sm font-semibold text-slate-800">Pencarian Kualifikasi & Skill</span>
-            <span className="text-xs text-slate-500 font-normal">Smart Talent Match</span>
+            <Search className="h-4 w-4 text-blue-600" />
+            <span className="text-sm font-semibold text-slate-800">Pencarian Talent & Skill</span>
+            <span className="text-xs text-slate-500 font-normal">Kualifikasi Karyawan</span>
           </div>
           <div className="flex gap-2">
             <Input
@@ -233,9 +233,10 @@ export default function Employees() {
             <Button
               onClick={() => aiSearch.mutate({ query: aiQuery })}
               disabled={aiQuery.trim().length < 2 || aiSearch.isPending}
+              className="bg-blue-600 hover:bg-blue-700"
             >
-              <Sparkles className="mr-2 h-4 w-4" />
-              {aiSearch.isPending ? "Menganalisis..." : "Cari dengan AI"}
+              <Search className="mr-2 h-4 w-4" />
+              {aiSearch.isPending ? "Mencari..." : "Cari Kualifikasi"}
             </Button>
             {aiResults && (
               <Button variant="ghost" size="icon" onClick={() => setAiResults(null)}>
@@ -246,9 +247,8 @@ export default function Employees() {
 
           {aiResults && (
             <div className="mt-4 space-y-2">
-              <p className="text-xs text-indigo-600">
-                {aiResults.results.length} karyawan diperingkat · model: {aiResults.model}
-                {aiResults.fallback && " (fallback)"}
+              <p className="text-xs text-blue-600">
+                {aiResults.results.length} karyawan ditemukan sesuai kualifikasi pencarian
               </p>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {aiResults.results.slice(0, 9).map((r, i) => {
@@ -263,7 +263,7 @@ export default function Employees() {
                   return (
                     <div key={emp.id} className="rounded-lg border bg-white p-3">
                       <div className="flex items-center gap-2.5">
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700">
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-xs font-bold text-blue-700">
                           #{i + 1}
                         </div>
                         <div className="min-w-0 flex-1">
@@ -272,7 +272,7 @@ export default function Employees() {
                             {emp.positionTitle} · {emp.departmentName}
                           </p>
                         </div>
-                        <Badge className="bg-indigo-600">{r.score.toFixed(0)}</Badge>
+                        <Badge className="bg-blue-600">{r.score.toFixed(0)}</Badge>
                       </div>
                       {emp.skills && (
                         <p className="mt-2 line-clamp-1 text-xs text-muted-foreground">{emp.skills}</p>

@@ -75,11 +75,11 @@ export default function Announcements() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {announcements?.map((a) => (
-            <Card key={a.id} className={a.pinned ? "border-indigo-300 bg-indigo-50/40" : ""}>
+            <Card key={a.id} className={a.pinned ? "border-blue-200 bg-blue-50/40" : ""}>
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between gap-2">
                   <CardTitle className="flex items-center gap-2 text-base">
-                    {a.pinned && <Pin className="h-4 w-4 text-indigo-500" />}
+                    {a.pinned && <Pin className="h-4 w-4 text-blue-600" />}
                     {a.title}
                   </CardTitle>
                   {isManager && (

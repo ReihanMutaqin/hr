@@ -86,7 +86,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
 function SidebarBrand() {
   return (
     <div className="flex items-center gap-2.5 px-5 py-5">
-      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 shadow-md">
+      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 shadow-md">
         <Building2 className="h-5 w-5 text-white" />
       </div>
       <div>
@@ -117,7 +117,7 @@ export default function AppLayout() {
         <div className="p-4 border-t border-slate-800">
           <div className="flex items-center gap-3">
             <Avatar className="h-9 w-9">
-              <AvatarFallback className="bg-indigo-600 text-white text-xs">
+              <AvatarFallback className="bg-blue-600 text-white text-xs">
                 {user ? initials(user.fullName) : "?"}
               </AvatarFallback>
             </Avatar>
@@ -157,7 +157,7 @@ export default function AppLayout() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-2 px-2">
                 <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-indigo-600 text-white text-xs">
+                  <AvatarFallback className="bg-blue-600 text-white text-xs">
                     {user ? initials(user.fullName) : "?"}
                   </AvatarFallback>
                 </Avatar>

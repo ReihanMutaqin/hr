@@ -114,7 +114,7 @@ export default function Performance() {
             <Button
               onClick={() => aiRank.mutate({ period: periodFilter !== "all" ? periodFilter : undefined, criteria: criteria || undefined })}
               disabled={aiRank.isPending}
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="bg-blue-600 hover:bg-blue-700"
             >
               <TrendingUp className="mr-2 h-4 w-4" />
               {aiRank.isPending ? "Menganalisis..." : "Evaluasi Peringkat"}
@@ -135,7 +135,7 @@ export default function Performance() {
               placeholder="Contoh: Produktivitas tinggi, kepemimpinan proyek, komunikasi (opsional)"
               value={criteria}
               onChange={(e) => setCriteria(e.target.value)}
-              className="flex-1 min-w-[260px] bg-white border border-slate-300 rounded px-2 py-1 text-xs outline-none focus:border-indigo-500"
+              className="flex-1 min-w-[260px] bg-white border border-slate-300 rounded px-2 py-1 text-xs outline-none focus:border-blue-600"
             />
           </CardContent>
         </Card>
@@ -219,11 +219,11 @@ export default function Performance() {
         <DialogContent className="max-h-[90vh] sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-indigo-500" />
-              Peringkat Kinerja oleh AI
+              <TrendingUp className="h-5 w-5 text-blue-600" />
+              Peringkat Evaluasi Kinerja Karyawan
             </DialogTitle>
             <DialogDescription>
-              Dianalisis dengan {ranking?.fallback ? "fallback keyword" : "NVIDIA Llama Nemotron Rerank"}
+              Dianalisis berdasarkan kriteria kualifikasi & pencapaian target.
             </DialogDescription>
           </DialogHeader>
           <ScrollArea className="max-h-[60vh] pr-3">
@@ -241,11 +241,11 @@ export default function Performance() {
                     <div className="flex items-center gap-2">
                       <div className="h-2 w-24 overflow-hidden rounded-full bg-slate-100">
                         <div
-                          className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500"
+                          className="h-full rounded-full bg-blue-600"
                           style={{ width: `${Math.max(4, r.score)}%` }}
                         />
                       </div>
-                      <Badge className="w-12 justify-center bg-indigo-600">{r.score.toFixed(0)}</Badge>
+                      <Badge className="w-12 justify-center bg-blue-600">{r.score.toFixed(0)}</Badge>
                     </div>
                   </div>
                   <p className="mt-2 line-clamp-2 pl-11 text-xs text-muted-foreground">

@@ -119,7 +119,7 @@ export default function Payroll() {
         </Card>
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
               <Wallet className="h-5 w-5" />
             </div>
             <div>
@@ -148,10 +148,10 @@ export default function Payroll() {
       </div>
 
       {!isManager && (
-        <Alert className="bg-indigo-50/50 text-indigo-900 border-indigo-100">
-          <Info className="h-4 w-4 text-indigo-600" />
-          <AlertTitle className="text-indigo-800 font-semibold">Informasi Komponen Gaji</AlertTitle>
-          <AlertDescription className="text-xs text-indigo-700 mt-2 space-y-1">
+        <Alert className="bg-blue-50/60 text-slate-900 border-blue-100">
+          <Info className="h-4 w-4 text-blue-600" />
+          <AlertTitle className="text-blue-900 font-semibold">Informasi Komponen Gaji</AlertTitle>
+          <AlertDescription className="text-xs text-slate-700 mt-2 space-y-1">
             <p><strong>Tunjangan (Allowance):</strong> 10% tetap dari Gaji Pokok.</p>
             <p><strong>Potongan (Deduction):</strong> Dihitung prorata jika Anda memiliki catatan tidak hadir di luar status 'Hadir' (Present) dan 'Terlambat' (Late) berdasar asumsi 22 hari kerja.</p>
             <p><strong>Pajak (PPh21):</strong> 5% flat dari Gaji Kotor (Pokok + Tunjangan - Potongan).</p>

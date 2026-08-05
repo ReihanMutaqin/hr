@@ -259,7 +259,7 @@ export default function Dashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <TrendingUp className="h-4 w-4 text-indigo-600" />
+                <TrendingUp className="h-4 w-4 text-blue-600" />
                 Aktivitas Evaluasi Rekrutmen
               </CardTitle>
               <CardDescription>Riwayat pemeringkatan terakhir</CardDescription>
@@ -268,7 +268,7 @@ export default function Dashboard() {
               <div className="space-y-3">
                 {(aiLogs ?? []).slice(0, 5).map((log) => (
                   <div key={log.id} className="flex items-start gap-2.5 text-sm">
-                    <Activity className="mt-0.5 h-3.5 w-3.5 shrink-0 text-indigo-500" />
+                    <Activity className="mt-0.5 h-3.5 w-3.5 shrink-0 text-blue-600" />
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
                         <Badge variant="outline" className="text-[10px]">
@@ -316,8 +316,8 @@ export default function Dashboard() {
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     {cand.aiScore && (
-                      <Badge variant="outline" className="border-indigo-200 text-indigo-600">
-                        AI {Number(cand.aiScore).toFixed(0)}
+                      <Badge variant="outline" className="border-blue-200 text-blue-700">
+                        Match {Number(cand.aiScore).toFixed(0)}%
                       </Badge>
                     )}
                     <Badge variant={statusVariant(cand.status)}>{statusLabel(cand.status)}</Badge>

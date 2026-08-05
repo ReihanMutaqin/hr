@@ -274,7 +274,7 @@ export default function Recruitment() {
                 key={job.id}
                 className={cn(
                   "cursor-pointer transition-all hover:shadow-md",
-                  selectedJobId === job.id && "ring-2 ring-indigo-500",
+                  selectedJobId === job.id && "ring-2 ring-blue-600",
                 )}
                 onClick={() => setSelectedJobId(job.id)}
               >
@@ -360,7 +360,7 @@ export default function Recruitment() {
                     <Button
                       onClick={() => rerank.mutate({ jobId: selectedJob.id })}
                       disabled={rerank.isPending || selectedJob.candidateCount === 0}
-                      className="bg-indigo-600 hover:bg-indigo-700"
+                      className="bg-blue-600 hover:bg-blue-700"
                     >
                       <TrendingUp className="mr-2 h-4 w-4" />
                       {rerank.isPending ? "Mengevaluasi dokumen..." : "Evaluasi Match Kandidat"}
@@ -451,7 +451,7 @@ export default function Recruitment() {
                                 variant="ghost"
                                 size="icon"
                                 title="Analisis Kualifikasi"
-                                className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                                 disabled={evaluateAI.isPending}
                                 onClick={() => {
                                   if (cand.aiNote && !cand.aiNote.startsWith("AI rerank")) {
@@ -520,7 +520,7 @@ export default function Recruitment() {
         <DialogContent className="max-h-[90vh] sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-slate-900">
-              <BarChart3 className="h-5 w-5 text-indigo-600" />
+              <BarChart3 className="h-5 w-5 text-blue-600" />
               Hasil Evaluasi & Peringkat Kandidat — {ranking?.jobTitle}
             </DialogTitle>
             <DialogDescription>
@@ -542,7 +542,7 @@ export default function Recruitment() {
                     <div className="flex items-center gap-2">
                       <div className="h-2 w-24 overflow-hidden rounded-full bg-slate-100">
                         <div
-                          className="h-full rounded-full bg-indigo-600"
+                          className="h-full rounded-full bg-blue-600"
                           style={{ width: `${Math.max(4, r.score)}%` }}
                         />
                       </div>
@@ -582,7 +582,7 @@ export default function Recruitment() {
         <DialogContent className="max-h-[85vh] sm:max-w-2xl flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <UserCheck className="h-5 w-5 text-indigo-600" />
+              <UserCheck className="h-5 w-5 text-blue-600" />
               Analisis Kualifikasi: {aiOpinionDialog?.candidateName}
             </DialogTitle>
             <DialogDescription>
