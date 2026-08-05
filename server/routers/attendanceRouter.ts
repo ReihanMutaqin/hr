@@ -13,9 +13,9 @@ function todayStr(): string {
 export type ShiftType = "pagi" | "siang" | "malam";
 
 export const SHIFT_CONFIG: Record<ShiftType, { name: string; hours: string; startHour: number; startMin: number; graceMin: number }> = {
-  pagi: { name: "Shift Pagi", hours: "07:00 – 15:00", startHour: 7, startMin: 0, graceMin: 15 },
-  siang: { name: "Shift Siang", hours: "15:00 – 23:00", startHour: 15, startMin: 0, graceMin: 15 },
-  malam: { name: "Shift Malam", hours: "23:00 – 07:00", startHour: 23, startMin: 0, graceMin: 15 },
+  pagi: { name: "Shift Pagi", hours: "08:00 – 16:00", startHour: 8, startMin: 0, graceMin: 15 },
+  siang: { name: "Shift Siang", hours: "16:00 – 00:00", startHour: 16, startMin: 0, graceMin: 15 },
+  malam: { name: "Shift Malam", hours: "00:00 – 08:00", startHour: 0, startMin: 0, graceMin: 15 },
 };
 
 export function calculateLateDuration(now: Date, shift: ShiftType) {

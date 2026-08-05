@@ -58,9 +58,9 @@ const ATT_STATUSES = ["present", "late", "absent", "leave", "sick", "holiday"] a
 type ShiftOption = "pagi" | "siang" | "malam";
 
 const SHIFT_OPTIONS = [
-  { id: "pagi", label: "Shift Pagi", hours: "07:00 – 15:00", icon: Sun, color: "text-amber-500 bg-amber-50 border-amber-200" },
-  { id: "siang", label: "Shift Siang", hours: "15:00 – 23:00", icon: Sunset, color: "text-blue-500 bg-blue-50 border-blue-200" },
-  { id: "malam", label: "Shift Malam", hours: "23:00 – 07:00", icon: Moon, color: "text-indigo-500 bg-indigo-50 border-indigo-200" },
+  { id: "pagi", label: "Shift Pagi", hours: "08:00 – 16:00", icon: Sun, color: "text-amber-500 bg-amber-50 border-amber-200" },
+  { id: "siang", label: "Shift Siang", hours: "16:00 – 00:00", icon: Sunset, color: "text-blue-500 bg-blue-50 border-blue-200" },
+  { id: "malam", label: "Shift Malam", hours: "00:00 – 08:00", icon: Moon, color: "text-indigo-500 bg-indigo-50 border-indigo-200" },
 ] as const;
 
 export default function Attendance() {
@@ -149,8 +149,8 @@ export default function Attendance() {
     
     // Auto detect shift based on current time
     const currentHour = new Date().getHours();
-    if (currentHour >= 5 && currentHour < 13) setSelectedShift("pagi");
-    else if (currentHour >= 13 && currentHour < 21) setSelectedShift("siang");
+    if (currentHour >= 6 && currentHour < 14) setSelectedShift("pagi");
+    else if (currentHour >= 14 && currentHour < 22) setSelectedShift("siang");
     else setSelectedShift("malam");
 
     setCapturedPhoto(null);
