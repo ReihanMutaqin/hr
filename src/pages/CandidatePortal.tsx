@@ -24,7 +24,6 @@ import {
   UploadCloud,
   X,
   Send,
-  Zap,
   Lock
 } from "lucide-react";
 import { toast } from "sonner";
@@ -170,7 +169,7 @@ export default function CandidatePortal() {
   if (isLoading) {
     return (
       <div className="flex h-screen flex-col items-center justify-center bg-slate-50 gap-3">
-        <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
+        <Loader2 className="h-9 w-9 animate-spin text-blue-600" />
         <p className="text-sm text-slate-500 font-medium animate-pulse">Memuat Informasi Lowongan...</p>
       </div>
     );
@@ -179,14 +178,14 @@ export default function CandidatePortal() {
   if (error || !job) {
     return (
       <div className="flex h-screen flex-col items-center justify-center bg-slate-50 p-4 text-center">
-        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-          <Briefcase className="h-8 w-8 text-slate-400" />
+        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-400">
+          <Briefcase className="h-8 w-8" />
         </div>
         <h1 className="text-2xl font-bold text-slate-900">Lowongan Tidak Ditemukan</h1>
-        <p className="mt-2 text-slate-500 max-w-sm">
+        <p className="mt-2 text-slate-500 max-w-sm text-sm">
           Posisi pekerjaan ini mungkin sudah dihapus, diarsipkan, atau tautan tidak valid.
         </p>
-        <Button className="mt-6 bg-indigo-600 hover:bg-indigo-700" onClick={() => window.location.reload()}>
+        <Button className="mt-6 bg-blue-600 hover:bg-blue-700 rounded-xl" onClick={() => window.location.reload()}>
           Coba Muat Ulang
         </Button>
       </div>
@@ -196,56 +195,54 @@ export default function CandidatePortal() {
   if (success) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6">
-        <div className="bg-white rounded-3xl shadow-xl border border-slate-100 max-w-xl w-full p-8 sm:p-12 text-center relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500" />
-          
-          <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-600 animate-bounce">
-            <CheckCircle2 className="h-10 w-10" />
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 max-w-xl w-full p-8 sm:p-12 text-center relative overflow-hidden">
+          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5 text-emerald-600">
+            <CheckCircle2 className="h-9 w-9" />
           </div>
 
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Lamaran Berhasil Terkirim!</h1>
-          <p className="mt-3 text-slate-600 leading-relaxed">
-            Terima kasih telah melamar posisi <strong className="text-indigo-600 font-semibold">{job.title}</strong> di NexusHR.
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Lamaran Berhasil Terkirim</h1>
+          <p className="mt-2 text-slate-600 text-sm leading-relaxed">
+            Terima kasih telah melamar posisi <strong className="text-slate-900 font-semibold">{job.title}</strong> di NexusHR.
           </p>
 
-          <div className="mt-8 bg-slate-50 border border-slate-200/80 rounded-2xl p-6 text-left space-y-3">
-            <div className="flex justify-between text-sm py-1 border-b border-slate-200/60">
-              <span className="text-slate-500">Nama Pelamar:</span>
+          <div className="mt-6 bg-slate-50 border border-slate-200 rounded-xl p-5 text-left space-y-2.5">
+            <div className="flex justify-between text-xs sm:text-sm py-1 border-b border-slate-200">
+              <span className="text-slate-500">Nama Pelamar</span>
               <span className="font-semibold text-slate-800">{form.fullName}</span>
             </div>
-            <div className="flex justify-between text-sm py-1 border-b border-slate-200/60">
-              <span className="text-slate-500">Email Kontak:</span>
+            <div className="flex justify-between text-xs sm:text-sm py-1 border-b border-slate-200">
+              <span className="text-slate-500">Email Kontak</span>
               <span className="font-semibold text-slate-800">{form.email}</span>
             </div>
-            <div className="flex justify-between text-sm py-1 border-b border-slate-200/60">
-              <span className="text-slate-500">Departemen:</span>
+            <div className="flex justify-between text-xs sm:text-sm py-1 border-b border-slate-200">
+              <span className="text-slate-500">Departemen</span>
               <span className="font-semibold text-slate-800">{job.departmentName || "Umum"}</span>
             </div>
-            <div className="flex justify-between text-sm py-1">
-              <span className="text-slate-500">Status Proses:</span>
-              <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full text-xs">
-                <CheckCircle2 className="w-3 h-3" /> Dalam Peninjauan HR
+            <div className="flex justify-between text-xs sm:text-sm py-1">
+              <span className="text-slate-500">Status Tahap</span>
+              <span className="inline-flex items-center gap-1 font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full text-xs">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Dalam Peninjauan HR
               </span>
             </div>
           </div>
 
-          <div className="mt-8 text-left bg-indigo-50/70 border border-indigo-100 rounded-2xl p-5">
-            <h4 className="text-sm font-bold text-indigo-900 flex items-center gap-2 mb-2">
-              <Clock className="w-4 h-4 text-indigo-600" /> Tahap Selanjutnya
+          <div className="mt-6 text-left bg-blue-50/60 border border-blue-100 rounded-xl p-4">
+            <h4 className="text-xs font-bold text-blue-900 flex items-center gap-2 mb-1.5">
+              <Clock className="w-4 h-4 text-blue-600" /> Tahap Selanjutnya
             </h4>
-            <ul className="text-xs text-indigo-800 space-y-1.5 list-disc list-inside">
-              <li>Tim Talent Acquisition NexusHR akan meninjau profil & CV Anda.</li>
+            <ul className="text-xs text-blue-800 space-y-1 list-disc list-inside">
+              <li>Tim Talent Acquisition akan meninjau profil & CV Anda.</li>
               <li>Tim HR akan mengonfirmasi berkas Anda dalam 1–3 hari kerja.</li>
               <li>Undangan seleksi berikutnya akan dikirimkan langsung ke email Anda.</li>
             </ul>
           </div>
 
-          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-            <Button variant="outline" className="rounded-xl border-slate-300" onClick={handleCopyLink}>
-              {copiedLink ? <Check className="w-4 h-4 mr-2 text-emerald-600" /> : <Copy className="w-4 h-4 mr-2" />}
+          <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+            <Button variant="outline" className="rounded-xl border-slate-300 text-slate-700" onClick={handleCopyLink}>
+              {copiedLink ? <Check className="w-4 h-4 mr-1.5 text-emerald-600" /> : <Copy className="w-4 h-4 mr-1.5" />}
               {copiedLink ? "Link Tersalin" : "Bagikan Info Lowongan"}
             </Button>
-            <Button className="rounded-xl bg-indigo-600 hover:bg-indigo-700 font-semibold" onClick={() => window.location.reload()}>
+            <Button className="rounded-xl bg-blue-600 hover:bg-blue-700 font-medium" onClick={() => window.location.reload()}>
               Selesai & Tutup
             </Button>
           </div>
@@ -255,19 +252,19 @@ export default function CandidatePortal() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/70 font-sans text-slate-800">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
       
-      {/* Top Navbar Header */}
-      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200/80 shadow-xs">
+      {/* Header Corporate Navbar */}
+      <header className="sticky top-0 z-30 bg-white border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-indigo-200">
+            <div className="h-9 w-9 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-lg">
               N
             </div>
             <div>
-              <span className="font-extrabold text-slate-900 tracking-tight text-lg">Nexus<span className="text-indigo-600">HR</span></span>
-              <span className="hidden sm:inline-block ml-2 text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md">
-                Career Portal
+              <span className="font-bold text-slate-900 tracking-tight text-lg">Nexus<span className="text-blue-600">HR</span></span>
+              <span className="hidden sm:inline-block ml-2.5 text-xs font-medium text-slate-500 border-l border-slate-200 pl-2.5">
+                Portal Karir Resmi
               </span>
             </div>
           </div>
@@ -278,7 +275,7 @@ export default function CandidatePortal() {
               {copiedLink ? "Tersalin" : "Salin Link"}
             </Button>
             <Button variant="outline" size="sm" className="rounded-lg border-slate-200 text-slate-700" onClick={handleShareWhatsApp}>
-              <Share2 className="w-3.5 h-3.5 sm:mr-1.5 text-emerald-600" />
+              <Share2 className="w-3.5 h-3.5 sm:mr-1.5 text-slate-600" />
               <span className="hidden sm:inline">Bagikan</span>
             </Button>
             {isClosed ? (
@@ -286,7 +283,7 @@ export default function CandidatePortal() {
                 Pendaftaran Ditutup
               </Button>
             ) : (
-              <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white font-medium shadow-xs" onClick={scrollToForm}>
+              <Button size="sm" className="bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium shadow-xs" onClick={scrollToForm}>
                 Lamar Sekarang
               </Button>
             )}
@@ -295,140 +292,136 @@ export default function CandidatePortal() {
       </header>
 
       {/* Main Content Container */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         
-        {/* Job Header Hero Card */}
-        <section className="relative overflow-hidden bg-white rounded-3xl border border-slate-200/80 shadow-xs p-6 sm:p-10">
-          <div className="absolute -top-24 -right-24 w-80 h-80 bg-indigo-50/80 rounded-full blur-3xl pointer-events-none" />
-          
-          <div className="relative z-10 space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              {isClosed ? (
-                <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200/80">
-                  <span className="w-2 h-2 rounded-full bg-rose-500" />
-                  <span>Pendaftaran Ditutup</span>
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/60">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                  <span>Menerima Lamaran (Aktif)</span>
-                </span>
-              )}
-
-              <span className="text-xs font-medium text-slate-400 flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5" />
-                Dipublikasikan {new Date(job.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+        {/* Job Header Card */}
+        <section className="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-blue-600 p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {isClosed ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                <span className="w-2 h-2 rounded-full bg-rose-500" />
+                <span>Pendaftaran Ditutup</span>
               </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span>Menerima Lamaran</span>
+              </span>
+            )}
+
+            <span className="text-xs text-slate-500 flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5" />
+              Dipublikasikan {new Date(job.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+            </span>
+          </div>
+
+          <div className="space-y-1.5">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              {job.title}
+            </h1>
+            <p className="text-slate-600 text-sm">
+              Departemen <span className="text-slate-900 font-semibold">{job.departmentName || "Umum"}</span> • {job.location || "Jakarta"}
+            </p>
+          </div>
+
+          {/* Key Info Badges */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+            <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <Briefcase className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-500">Tipe Pekerjaan</p>
+                <p className="text-sm font-semibold text-slate-800 capitalize">{job.employmentType}</p>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
-                {job.title}
-              </h1>
-              <p className="text-slate-500 font-medium text-sm sm:text-base">
-                Informasi lowongan kerja untuk posisi di departemen <span className="text-slate-800 font-semibold">{job.departmentName || "Umum"}</span>.
-              </p>
+            <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+                <MapPin className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-500">Lokasi Kerja</p>
+                <p className="text-sm font-semibold text-slate-800">{job.location || "Jakarta"}</p>
+              </div>
             </div>
 
-            {/* Quick Badges Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-              <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-3.5 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-100/70 text-indigo-600 flex items-center justify-center shrink-0">
-                  <Briefcase className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-slate-400">Tipe Pekerjaan</p>
-                  <p className="text-sm font-bold text-slate-800 capitalize">{job.employmentType}</p>
-                </div>
+            <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                <DollarSign className="w-4 h-4" />
               </div>
-
-              <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-3.5 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-100/70 text-purple-600 flex items-center justify-center shrink-0">
-                  <MapPin className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-slate-400">Lokasi Kerja</p>
-                  <p className="text-sm font-bold text-slate-800">{job.location || "Jakarta"}</p>
-                </div>
+              <div>
+                <p className="text-xs text-slate-500">Kisaran Gaji</p>
+                <p className="text-sm font-semibold text-slate-800">
+                  {job.salaryMin > 0 && job.salaryMax > 0 
+                    ? `${formatIDR(job.salaryMin)} - ${formatIDR(job.salaryMax)}`
+                    : "Kompetitif"}
+                </p>
               </div>
+            </div>
 
-              <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-3.5 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-100/70 text-emerald-600 flex items-center justify-center shrink-0">
-                  <DollarSign className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-slate-400">Kisaran Gaji</p>
-                  <p className="text-sm font-bold text-slate-800">
-                    {job.salaryMin > 0 && job.salaryMax > 0 
-                      ? `${formatIDR(job.salaryMin)} - ${formatIDR(job.salaryMax)}`
-                      : "Kompetitif"}
-                  </p>
-                </div>
+            <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+                <Building2 className="w-4 h-4" />
               </div>
-
-              <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-3.5 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-100/70 text-amber-600 flex items-center justify-center shrink-0">
-                  <Building2 className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-slate-400">Departemen</p>
-                  <p className="text-sm font-bold text-slate-800">{job.departmentName || "General"}</p>
-                </div>
+              <div>
+                <p className="text-xs text-slate-500">Departemen</p>
+                <p className="text-sm font-semibold text-slate-800">{job.departmentName || "General"}</p>
               </div>
             </div>
           </div>
         </section>
 
         {/* Layout Grid: 2 Columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          {/* Left Column: Job Content & Application Form */}
-          <div className="lg:col-span-2 space-y-8">
+          {/* Left Column: Job Details & Form */}
+          <div className="lg:col-span-2 space-y-6">
             
             {/* Job Description Card */}
-            <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 space-y-6">
-              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2 border-b pb-4 border-slate-100">
-                <FileText className="w-5 h-5 text-indigo-600" />
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 space-y-6 shadow-xs">
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 border-b pb-3 border-slate-100">
+                <FileText className="w-4 h-4 text-blue-600" />
                 Deskripsi Pekerjaan
               </h2>
-              <div className="text-slate-700 leading-relaxed whitespace-pre-line text-sm sm:text-base">
+              <div className="text-slate-700 leading-relaxed whitespace-pre-line text-sm">
                 {job.description}
               </div>
 
               {job.requirements && (
                 <>
-                  <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2 border-b pb-4 pt-4 border-slate-100">
-                    <Award className="w-5 h-5 text-indigo-600" />
+                  <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 border-b pb-3 pt-3 border-slate-100">
+                    <Award className="w-4 h-4 text-blue-600" />
                     Persyaratan & Kualifikasi
                   </h2>
-                  <div className="text-slate-700 leading-relaxed whitespace-pre-line text-sm sm:text-base">
+                  <div className="text-slate-700 leading-relaxed whitespace-pre-line text-sm">
                     {job.requirements}
                   </div>
                 </>
               )}
 
               {/* Perks & Benefits Section */}
-              <div className="pt-4 border-t border-slate-100">
-                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <HeartHandshake className="w-5 h-5 text-indigo-600" />
-                  Benefit & Fasilitas Perusahaan
+              <div className="pt-3 border-t border-slate-100">
+                <h3 className="text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
+                  <HeartHandshake className="w-4 h-4 text-blue-600" />
+                  Fasilitas & Benefit
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                    <span>Asuransi Kesehatan & BPJS Ketenagakerjaan lengkap</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div className="flex items-start gap-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200/60 text-xs">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>Asuransi Kesehatan & BPJS lengkap</span>
                   </div>
-                  <div className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                    <span>Perangkat kerja modern (Laptop & Perlengkapan pendukung)</span>
+                  <div className="flex items-start gap-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200/60 text-xs">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>Perangkat kerja modern & perlengkapan pendukung</span>
                   </div>
-                  <div className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                    <span>Jam kerja fleksibel & budaya kerja kolaboratif</span>
+                  <div className="flex items-start gap-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200/60 text-xs">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>Jam kerja fleksibel & lingkungan profesional</span>
                   </div>
-                  <div className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                    <span>Budget pengembangan skill, sertifikasi, & pelatihan profesional</span>
+                  <div className="flex items-start gap-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200/60 text-xs">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>Dukungan pengembangan karir & pelatihan profesional</span>
                   </div>
                 </div>
               </div>
@@ -436,124 +429,121 @@ export default function CandidatePortal() {
 
             {/* Application Form Card OR Closed Notice */}
             {isClosed ? (
-              <div ref={formRef} className="bg-rose-50/40 border border-rose-100 rounded-3xl p-8 text-center space-y-4 shadow-xs scroll-mt-20">
-                <div className="w-16 h-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
-                  <Lock className="w-8 h-8" />
+              <div ref={formRef} className="bg-white border border-rose-200 rounded-2xl p-8 text-center space-y-3 shadow-xs scroll-mt-20">
+                <div className="w-14 h-14 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+                  <Lock className="w-7 h-7" />
                 </div>
                 <div className="space-y-1">
-                  <h2 className="text-2xl font-extrabold text-slate-900">Pendaftaran Ditutup</h2>
+                  <h2 className="text-xl font-bold text-slate-900">Pendaftaran Ditutup</h2>
                   <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-                    Terima kasih atas antusiasme Anda. Pendaftaran untuk posisi <strong className="text-slate-900">{job.title}</strong> saat ini telah resmi ditutup dan tidak lagi menerima lamaran baru.
+                    Terima kasih atas minat Anda. Pendaftaran untuk posisi <strong className="text-slate-900">{job.title}</strong> saat ini telah resmi ditutup.
                   </p>
                 </div>
                 <div className="pt-2 text-xs text-slate-500 flex items-center justify-center gap-1.5">
                   <ShieldCheck className="w-4 h-4 text-slate-400" />
-                  <span>Detail deskripsi di atas tetap dapat dibaca sebagai referensi.</span>
+                  <span>Detail lowongan di atas tetap dapat dibaca sebagai referensi.</span>
                 </div>
               </div>
             ) : (
-              <div ref={formRef} className="bg-white rounded-3xl border border-indigo-100 shadow-md p-6 sm:p-8 space-y-6 scroll-mt-20">
-                <div className="border-b border-slate-100 pb-5">
-                  <div className="flex items-center gap-2 text-indigo-600 font-semibold text-xs uppercase tracking-wider mb-1">
-                    Formulir Pendaftaran Resmi
-                  </div>
-                  <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Lamar Posisi Ini</h2>
-                  <p className="text-sm text-slate-500 mt-1">
-                    Lengkapi informasi data diri dan unggah CV PDF Anda untuk diproses oleh tim rekrutmen NexusHR.
+              <div ref={formRef} className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 space-y-6 shadow-xs scroll-mt-20">
+                <div className="border-b border-slate-100 pb-4">
+                  <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Formulir Lamaran Kerja</h2>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Silakan isi informasi data diri dan unggah berkas CV PDF Anda secara lengkap.
                   </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-5">
                   
                   {/* Form Fields Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     
                     {/* Full Name */}
-                    <div className="space-y-2">
-                      <Label htmlFor="fullName" className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5 text-indigo-500" /> Nama Lengkap *
+                    <div className="space-y-1.5">
+                      <Label htmlFor="fullName" className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                        <User className="w-3.5 h-3.5 text-blue-600" /> Nama Lengkap *
                       </Label>
                       <Input
                         id="fullName"
                         required
                         placeholder="Contoh: Budi Santoso"
-                        className="rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 h-11"
+                        className="rounded-lg border-slate-200 focus:border-blue-600 focus:ring-blue-600 h-10 text-sm"
                         value={form.fullName}
                         onChange={(e) => setForm((f) => ({ ...f, fullName: e.target.value }))}
                       />
                     </div>
 
                     {/* Email */}
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                        <Mail className="w-3.5 h-3.5 text-indigo-500" /> Email Aktif *
+                    <div className="space-y-1.5">
+                      <Label htmlFor="email" className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                        <Mail className="w-3.5 h-3.5 text-blue-600" /> Email Aktif *
                       </Label>
                       <Input
                         id="email"
                         type="email"
                         required
                         placeholder="budi@example.com"
-                        className="rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 h-11"
+                        className="rounded-lg border-slate-200 focus:border-blue-600 focus:ring-blue-600 h-10 text-sm"
                         value={form.email}
                         onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                       />
                     </div>
 
                     {/* Phone / WhatsApp */}
-                    <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                        <Phone className="w-3.5 h-3.5 text-indigo-500" /> Nomor Telepon / WhatsApp *
+                    <div className="space-y-1.5">
+                      <Label htmlFor="phone" className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                        <Phone className="w-3.5 h-3.5 text-blue-600" /> Nomor Telepon / WhatsApp *
                       </Label>
                       <Input
                         id="phone"
                         type="tel"
                         required
                         placeholder="081234567890"
-                        className="rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 h-11"
+                        className="rounded-lg border-slate-200 focus:border-blue-600 focus:ring-blue-600 h-10 text-sm"
                         value={form.phone}
                         onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
                       />
                     </div>
 
                     {/* Current Company */}
-                    <div className="space-y-2">
-                      <Label htmlFor="currentCompany" className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                        <Building2 className="w-3.5 h-3.5 text-indigo-500" /> Perusahaan / Posisi Saat Ini (Opsional)
+                    <div className="space-y-1.5">
+                      <Label htmlFor="currentCompany" className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                        <Building2 className="w-3.5 h-3.5 text-blue-600" /> Perusahaan / Posisi saat ini (Opsional)
                       </Label>
                       <Input
                         id="currentCompany"
-                        placeholder="PT Maju Bersama / Senior Dev"
-                        className="rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 h-11"
+                        placeholder="PT Maju Bersama / Staff"
+                        className="rounded-lg border-slate-200 focus:border-blue-600 focus:ring-blue-600 h-10 text-sm"
                         value={form.currentCompany}
                         onChange={(e) => setForm((f) => ({ ...f, currentCompany: e.target.value }))}
                       />
                     </div>
 
                     {/* Portfolio / LinkedIn */}
-                    <div className="space-y-2">
-                      <Label htmlFor="portfolioUrl" className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                        <Globe className="w-3.5 h-3.5 text-indigo-500" /> Link Portofolio / LinkedIn / GitHub (Opsional)
+                    <div className="space-y-1.5">
+                      <Label htmlFor="portfolioUrl" className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                        <Globe className="w-3.5 h-3.5 text-blue-600" /> Tautan Portofolio / LinkedIn (Opsional)
                       </Label>
                       <Input
                         id="portfolioUrl"
                         type="url"
                         placeholder="https://linkedin.com/in/username"
-                        className="rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 h-11"
+                        className="rounded-lg border-slate-200 focus:border-blue-600 focus:ring-blue-600 h-10 text-sm"
                         value={form.portfolioUrl}
                         onChange={(e) => setForm((f) => ({ ...f, portfolioUrl: e.target.value }))}
                       />
                     </div>
 
                     {/* Expected Salary */}
-                    <div className="space-y-2">
-                      <Label htmlFor="expectedSalary" className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                        <DollarSign className="w-3.5 h-3.5 text-indigo-500" /> Ekspektasi Gaji per Bulan (Rp) (Opsional)
+                    <div className="space-y-1.5">
+                      <Label htmlFor="expectedSalary" className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                        <DollarSign className="w-3.5 h-3.5 text-blue-600" /> Ekspektasi Gaji per Bulan (Rp) (Opsional)
                       </Label>
                       <Input
                         id="expectedSalary"
                         type="number"
-                        placeholder="12000000"
-                        className="rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 h-11"
+                        placeholder="10000000"
+                        className="rounded-lg border-slate-200 focus:border-blue-600 focus:ring-blue-600 h-10 text-sm"
                         value={form.expectedSalary}
                         onChange={(e) => setForm((f) => ({ ...f, expectedSalary: e.target.value }))}
                       />
@@ -562,25 +552,25 @@ export default function CandidatePortal() {
                   </div>
 
                   {/* Cover Letter */}
-                  <div className="space-y-2">
-                    <Label htmlFor="coverLetter" className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                      <FileText className="w-3.5 h-3.5 text-indigo-500" /> Catatan Singkat / Cover Letter (Opsional)
+                  <div className="space-y-1.5">
+                    <Label htmlFor="coverLetter" className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                      <FileText className="w-3.5 h-3.5 text-blue-600" /> Cover Letter / Catatan Tambahan (Opsional)
                     </Label>
                     <Textarea
                       id="coverLetter"
                       rows={3}
-                      placeholder="Ceritakan secara singkat keahlian utama Anda dan mengapa Anda tertarik dengan posisi ini..."
-                      className="rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                      placeholder="Jelaskan secara ringkas pengalaman dan alasan Anda berminat..."
+                      className="rounded-lg border-slate-200 focus:border-blue-600 focus:ring-blue-600 text-sm"
                       value={form.coverLetter}
                       onChange={(e) => setForm((f) => ({ ...f, coverLetter: e.target.value }))}
                     />
                   </div>
 
                   {/* Upload CV Dropzone */}
-                  <div className="space-y-2">
-                    <Label className="text-xs font-bold text-slate-700 flex items-center justify-between">
-                      <span className="flex items-center gap-1.5">
-                        <UploadCloud className="w-4 h-4 text-indigo-500" /> Unggah Dokumen CV (PDF) *
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-slate-700 flex items-center justify-between">
+                      <span className="flex items-center gap-1">
+                        <UploadCloud className="w-3.5 h-3.5 text-blue-600" /> Unggah File CV (PDF) *
                       </span>
                       <span className="text-xs font-normal text-slate-400">Maks. 5MB</span>
                     </Label>
@@ -588,16 +578,14 @@ export default function CandidatePortal() {
                     {!file ? (
                       <label 
                         htmlFor="cv-upload"
-                        className="group flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-indigo-200 hover:border-indigo-500 bg-indigo-50/30 hover:bg-indigo-50/60 rounded-2xl cursor-pointer transition-all p-6 text-center"
+                        className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-slate-300 hover:border-blue-600 bg-slate-50 hover:bg-blue-50/30 rounded-xl cursor-pointer transition-all p-4 text-center"
                       >
-                        <div className="w-12 h-12 rounded-2xl bg-indigo-100 group-hover:scale-110 transition-transform flex items-center justify-center text-indigo-600 mb-3">
-                          <UploadCloud className="w-6 h-6" />
-                        </div>
-                        <p className="text-sm font-semibold text-slate-800">
+                        <UploadCloud className="w-8 h-8 text-slate-400 mb-2" />
+                        <p className="text-xs font-semibold text-slate-700">
                           Klik untuk memilih file CV atau drag & drop di sini
                         </p>
-                        <p className="text-xs text-slate-400 mt-1">
-                          Format file harus berupa <span className="font-semibold text-indigo-600">PDF berbasis teks</span>.
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          Format PDF berbasis teks.
                         </p>
                         <input
                           id="cv-upload"
@@ -611,18 +599,18 @@ export default function CandidatePortal() {
                         />
                       </label>
                     ) : (
-                      <div className="border border-indigo-200 bg-indigo-50/50 rounded-2xl p-4 flex items-center justify-between">
+                      <div className="border border-slate-200 bg-slate-50 rounded-xl p-3.5 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                          <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
                             PDF
                           </div>
                           <div>
-                            <p className="text-sm font-bold text-slate-800 truncate max-w-xs sm:max-w-sm">{file.name}</p>
+                            <p className="text-xs font-bold text-slate-800 truncate max-w-xs sm:max-w-sm">{file.name}</p>
                             <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-500">
                               <span>{(file.size / 1024 / 1024).toFixed(2)} MB</span>
                               {isExtracting ? (
-                                <span className="text-indigo-600 font-medium flex items-center gap-1">
-                                  <Loader2 className="w-3 h-3 animate-spin" /> Membaca Teks PDF...
+                                <span className="text-blue-600 font-medium flex items-center gap-1">
+                                  <Loader2 className="w-3 h-3 animate-spin" /> Membaca PDF...
                                 </span>
                               ) : extractSuccess ? (
                                 <span className="text-emerald-600 font-semibold flex items-center gap-1">
@@ -636,7 +624,7 @@ export default function CandidatePortal() {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="text-slate-400 hover:text-red-500 rounded-xl"
+                          className="text-slate-400 hover:text-red-500 rounded-lg h-8 w-8"
                           onClick={() => {
                             setFile(null);
                             setExtractSuccess(false);
@@ -650,16 +638,16 @@ export default function CandidatePortal() {
                   </div>
 
                   {/* Consent Checkbox */}
-                  <div className="flex items-start gap-2.5 pt-2">
+                  <div className="flex items-start gap-2 pt-1">
                     <input
                       id="terms"
                       type="checkbox"
                       checked={agreeTerms}
                       onChange={(e) => setAgreeTerms(e.target.checked)}
-                      className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                      className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                     />
-                    <label htmlFor="terms" className="text-xs text-slate-600 cursor-pointer leading-relaxed">
-                      Saya menyatakan bahwa seluruh data dan dokumen yang saya unggah adalah asli, benar, dan dapat dipertanggungjawabkan untuk keperluan rekrutmen.
+                    <label htmlFor="terms" className="text-xs text-slate-600 cursor-pointer leading-normal">
+                      Saya mengonfirmasi bahwa data dan berkas CV yang diisi adalah benar dan valid.
                     </label>
                   </div>
 
@@ -667,19 +655,19 @@ export default function CandidatePortal() {
                   <Button
                     type="submit"
                     disabled={isExtracting || apply.isPending || !file}
-                    className="w-full h-13 text-base font-bold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-2xl shadow-lg shadow-indigo-200 transition-all"
+                    className="w-full h-11 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-xs transition-colors"
                   >
                     {isExtracting ? (
                       <span className="flex items-center gap-2">
-                        <Loader2 className="w-5 h-5 animate-spin" /> Memeriksa Berkas CV...
+                        <Loader2 className="w-4 h-4 animate-spin" /> Memeriksa Berkas CV...
                       </span>
                     ) : apply.isPending ? (
                       <span className="flex items-center gap-2">
-                        <Loader2 className="w-5 h-5 animate-spin" /> Mengirimkan Lamaran...
+                        <Loader2 className="w-4 h-4 animate-spin" /> Mengirimkan Lamaran...
                       </span>
                     ) : (
                       <span className="flex items-center gap-2">
-                        Kirim Lamaran Sekarang <Send className="w-4 h-4 ml-1" />
+                        Kirim Lamaran Pekerjaan <Send className="w-4 h-4 ml-1" />
                       </span>
                     )}
                   </Button>
@@ -689,107 +677,104 @@ export default function CandidatePortal() {
 
           </div>
 
-          {/* Right Column: Sidebar Info & Help */}
+          {/* Right Column: Sidebar Info */}
           <aside className="space-y-6">
             
-            {/* Quick Sticky Card */}
-            <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-xs space-y-4">
-              <h3 className="font-bold text-slate-900 text-base">Ringkasan Posisi</h3>
+            {/* Job Summary Sidebar Card */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+              <h3 className="font-bold text-slate-900 text-sm">Ringkasan Posisi</h3>
               
-              <div className="space-y-3 text-xs">
-                <div className="flex justify-between py-2 border-b border-slate-100">
+              <div className="space-y-2.5 text-xs">
+                <div className="flex justify-between py-1.5 border-b border-slate-100">
                   <span className="text-slate-500">Departemen</span>
                   <span className="font-semibold text-slate-800">{job.departmentName || "Umum"}</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-slate-100">
+                <div className="flex justify-between py-1.5 border-b border-slate-100">
                   <span className="text-slate-500">Tipe Pekerjaan</span>
                   <span className="font-semibold text-slate-800 capitalize">{job.employmentType}</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-slate-100">
+                <div className="flex justify-between py-1.5 border-b border-slate-100">
                   <span className="text-slate-500">Lokasi</span>
                   <span className="font-semibold text-slate-800">{job.location || "Jakarta"}</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-slate-100">
+                <div className="flex justify-between py-1.5 border-b border-slate-100">
                   <span className="text-slate-500">Status Pendaftaran</span>
-                  <span className={`font-semibold px-2 py-0.5 rounded-md ${isClosed ? 'text-rose-600 bg-rose-50' : 'text-indigo-600 bg-indigo-50'}`}>
+                  <span className={`font-semibold px-2 py-0.5 rounded-md ${isClosed ? 'text-rose-700 bg-rose-50' : 'text-emerald-700 bg-emerald-50'}`}>
                     {isClosed ? 'Pendaftaran Ditutup' : 'Menerima Lamaran'}
                   </span>
                 </div>
-                <div className="flex justify-between py-2">
+                <div className="flex justify-between py-1.5">
                   <span className="text-slate-500">Waktu Respon HR</span>
-                  <span className="font-semibold text-emerald-600">1 - 3 Hari Kerja</span>
+                  <span className="font-semibold text-slate-800">1 - 3 Hari Kerja</span>
                 </div>
               </div>
 
               {isClosed ? (
-                <Button disabled className="w-full bg-slate-100 text-slate-400 font-semibold rounded-xl cursor-not-allowed">
+                <Button disabled className="w-full bg-slate-100 text-slate-400 font-medium rounded-xl cursor-not-allowed text-xs">
                   Pendaftaran Ditutup
                 </Button>
               ) : (
-                <Button className="w-full bg-indigo-600 hover:bg-indigo-700 font-semibold rounded-xl" onClick={scrollToForm}>
-                  Lamar Posisi Ini <ArrowRight className="w-4 h-4 ml-1" />
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 font-medium rounded-xl text-xs" onClick={scrollToForm}>
+                  Lamar Posisi Ini <ArrowRight className="w-3.5 h-3.5 ml-1" />
                 </Button>
               )}
             </div>
 
-            {/* Hiring Process Card */}
-            <div className="bg-gradient-to-br from-indigo-900 to-slate-900 rounded-3xl p-6 text-white space-y-4 shadow-md">
-              <div className="flex items-center gap-2 text-indigo-300 font-semibold text-xs uppercase tracking-wider">
-                <Zap className="w-4 h-4 text-amber-400" /> Proses Rekrutmen
-              </div>
-              <h3 className="font-bold text-lg leading-tight">4 Langkah Seleksi Mudah</h3>
+            {/* Selection Steps Card */}
+            <div className="bg-slate-900 rounded-2xl p-6 text-white space-y-4 shadow-xs">
+              <h3 className="font-bold text-sm leading-tight text-white">4 Tahap Rekrutmen</h3>
               
-              <div className="space-y-4 text-xs text-slate-300 pt-2">
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-indigo-500/30 border border-indigo-400 text-indigo-300 flex items-center justify-center font-bold text-xs shrink-0">
+              <div className="space-y-3.5 text-xs text-slate-300">
+                <div className="flex items-start gap-2.5">
+                  <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                     1
                   </div>
                   <div>
-                    <p className="font-semibold text-white">Upload CV PDF</p>
-                    <p className="text-slate-400 mt-0.5">Kirim berkas & informasi data diri Anda.</p>
+                    <p className="font-semibold text-white">Kirim Lamaran & CV</p>
+                    <p className="text-slate-400 text-xs mt-0.5">Unggah CV PDF dan isi formulir data diri.</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-indigo-500/30 border border-indigo-400 text-indigo-300 flex items-center justify-center font-bold text-xs shrink-0">
+                <div className="flex items-start gap-2.5">
+                  <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                     2
                   </div>
                   <div>
-                    <p className="font-semibold text-white">Screening Berkas & Profil</p>
-                    <p className="text-slate-400 mt-0.5">Tim HR memverifikasi kualifikasi & kecocokan pengalaman Anda.</p>
+                    <p className="font-semibold text-white">Peninjauan Berkas HR</p>
+                    <p className="text-slate-400 text-xs mt-0.5">Tim HR memeriksa kualifikasi & pengalaman.</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-indigo-500/30 border border-indigo-400 text-indigo-300 flex items-center justify-center font-bold text-xs shrink-0">
+                <div className="flex items-start gap-2.5">
+                  <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                     3
                   </div>
                   <div>
                     <p className="font-semibold text-white">Wawancara HR & User</p>
-                    <p className="text-slate-400 mt-0.5">Diskusi mendalam mengenai pengalaman & kecocokan budaya.</p>
+                    <p className="text-slate-400 text-xs mt-0.5">Sesi wawancara teknis dan kesesuaian budaya.</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-indigo-500/30 border border-indigo-400 text-indigo-300 flex items-center justify-center font-bold text-xs shrink-0">
+                <div className="flex items-start gap-2.5">
+                  <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                     4
                   </div>
                   <div>
-                    <p className="font-semibold text-white">Offering Letter</p>
-                    <p className="text-slate-400 mt-0.5">Penawaran resmi bergabung dalam keluarga besar NexusHR.</p>
+                    <p className="font-semibold text-white">Penawaran Kerja</p>
+                    <p className="text-slate-400 text-xs mt-0.5">Penyampaian Offering Letter resmi.</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Data Privacy & Security Badge */}
-            <div className="bg-white rounded-3xl border border-slate-200/80 p-5 space-y-3">
-              <div className="flex items-center gap-2.5 text-slate-800 font-bold text-sm">
-                <ShieldCheck className="w-5 h-5 text-emerald-600" />
-                Bebas Biaya & Aman
+            {/* Privacy Badge */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-2">
+              <div className="flex items-center gap-2 text-slate-800 font-bold text-xs">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                Bebas Biaya & Terjaga
               </div>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Seluruh proses pendaftaran di NexusHR <strong className="text-slate-700">100% gratis</strong>. Kami menjaga ketat kerahasiaan data pribadi Anda sesuai dengan standar keamanan data internasional.
+                Seluruh proses rekrutmen di NexusHR <strong className="text-slate-700">100% bebas biaya</strong>. Data pribadi Anda dijaga secara aman.
               </p>
             </div>
 
@@ -799,11 +784,11 @@ export default function CandidatePortal() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 mt-16 py-8">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+      <footer className="bg-white border-t border-slate-200 mt-12 py-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3">
           <div className="flex items-center gap-2">
             <span className="font-bold text-slate-800">NexusHR</span>
-            <span>• Modern HR Career Portal</span>
+            <span>• Portal Rekrutmen Resmi</span>
           </div>
           <p>© {new Date().getFullYear()} NexusHR System. All rights reserved.</p>
         </div>
